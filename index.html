@@ -307,58 +307,61 @@
       };
 
       const berekenAlles = () => {
-        const wozNum = parseFloat(wozWaarde) || 0;
-        const box1P1 = berekenBox1(brutoLoon, eigenWoningRente, arbeidsongeschiktheid, wozNum);
-        const box1P2 = fiscaalPartner ? berekenBox1(brutoLoonPartner, eigenWoningRentePartner, arbeidsongeschiktheidPartner, 0) : { box1Inkomen: 0, belasting: 0 };
-        const totaalBox1Inkomen = box1P1.box1Inkomen + box1P2.box1Inkomen;
-        const totaalBox1Belasting = box1P1.belasting + box1P2.belasting;
-        const box3 = berekenBox3(bankrekeningen, beleggingen, schulden, bankrekeningenPartner, beleggingenPartner, schuldenPartner);
-        const totaalBox3Belasting = box3.box3Belasting;
-        const kortingen1 = berekenHeffingskortingen(totaalBox1Inkomen, parseFloat(brutoLoon) || 0);
-        const kortingen2 = fiscaalPartner ? berekenHeffingskortingen(totaalBox1Inkomen, parseFloat(brutoLoonPartner) || 0) : { ahk: 0, ak: 0 };
-               // IACK logica: alleen als minstens 1 kind < 12 jaar
-        const heeftKindOnder12 = kinderenLeeftijden.some(l => l < 12);
-        let iackTotaal = 0;
-        if (heeftKindOnder12 && aantalKinderen > 0) {
-          const iack1 = berekenIACK(parseFloat(brutoLoon) || 0);
-          if (fiscaalPartner) {
-            const iack2 = berekenIACK(parseFloat(brutoLoonPartner) || 0);
-            // Minstverdienende krijgt IACK
-            iackTotaal = (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iack1 : iack2;
-          } else {
-            iackTotaal = iack1;
-          }
-        }
-        const totaalHeffingskortingen = kortingen1.ahk + kortingen1.ak + kortingen2.ahk + kortingen2.ak + iackTotaal;
-        const brutoBelasting = totaalBox1Belasting + totaalBox3Belasting;
-        const nettoBelasting = Math.max(0, brutoBelasting - totaalHeffingskortingen);
-        const totaalIngehoudenLoonheffing = (parseFloat(ingehoudenLoonheffing) || 0) + (parseFloat(ingehoudenLoonheffingPartner) || 0);
-        const teBetalenOntvangen = totaalIngehoudenLoonheffing - nettoBelasting;
-        const kindgebondenBudget = berekenKindgebondenBudget(totaalBox1Inkomen, aantalKinderen);
-        const kinderbijslag = berekenKinderbijslag(kinderenLeeftijden);
-        const kinderopvangtoeslag = berekenKinderopvangtoeslag(totaalBox1Inkomen, kindOpvang);
-        setResultaten({
-          persoon1: {box1: box1P1, kortingen: kortingen1, iack: iackTotaal > 0 && (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iackTotaal : 0},
-          persoon2: {box1: box1P2, kortingen: kortingen2, iack: iackTotaal > 0 && fiscaalPartner && (parseFloat(brutoLoonPartner) || 0) < (parseFloat(brutoLoon) || 0) ? iackTotaal : 0},
-          box3,
-          totaal: {
-            box1Inkomen: totaalBox1Inkomen,
-            box1Belasting: totaalBox1Belasting,
-            box3Belasting: totaalBox3Belasting,
-            brutoBelasting,
-            heffingskortingen: totaalHeffingskortingen,
-            nettoBelasting,
-            ingehoudenLoonheffing: totaalIngehoudenLoonheffing,
-            teBetalenOntvangen,
-            kindgebondenBudget,
-            kinderbijslag,
-            kinderopvangtoeslag,
-            verzamelinkomen: totaalBox1Inkomen,
-            iackTotaal
-          }
-        });
-        setActiveTab('resultaten');
-      };
+  const wozNum = parseFloat(wozWaarde) || 0;
+  const box1P1 = berekenBox1(brutoLoon, eigenWoningRente, arbeidsongeschiktheid, wozNum);
+  const box1P2 = fiscaalPartner ? berekenBox1(brutoLoonPartner, eigenWoningRentePartner, arbeidsongeschiktheidPartner, 0) : { box1Inkomen: 0, belasting: 0 };
+  const totaalBox1Inkomen = box1P1.box1Inkomen + box1P2.box1Inkomen;
+  const totaalBox1Belasting = box1P1.belasting + box1P2.belasting;
+  const box3 = berekenBox3(bankrekeningen, beleggingen, schulden, bankrekeningenPartner, beleggingenPartner, schuldenPartner);
+  const totaalBox3Belasting = box3.box3Belasting;
+  
+  // CORRECTIE: Gebruik individueel Box 1 inkomen per persoon voor AHK berekening
+  const kortingen1 = berekenHeffingskortingen(box1P1.box1Inkomen, parseFloat(brutoLoon) || 0);
+  const kortingen2 = fiscaalPartner ? berekenHeffingskortingen(box1P2.box1Inkomen, parseFloat(brutoLoonPartner) || 0) : { ahk: 0, ak: 0 };
+  
+  // IACK logica: alleen als minstens 1 kind < 12 jaar
+  const heeftKindOnder12 = kinderenLeeftijden.some(l => l < 12);
+  let iackTotaal = 0;
+  if (heeftKindOnder12 && aantalKinderen > 0) {
+    const iack1 = berekenIACK(parseFloat(brutoLoon) || 0);
+    if (fiscaalPartner) {
+      const iack2 = berekenIACK(parseFloat(brutoLoonPartner) || 0);
+      // Minstverdienende krijgt IACK
+      iackTotaal = (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iack1 : iack2;
+    } else {
+      iackTotaal = iack1;
+    }
+  }
+  const totaalHeffingskortingen = kortingen1.ahk + kortingen1.ak + kortingen2.ahk + kortingen2.ak + iackTotaal;
+  const brutoBelasting = totaalBox1Belasting + totaalBox3Belasting;
+  const nettoBelasting = Math.max(0, brutoBelasting - totaalHeffingskortingen);
+  const totaalIngehoudenLoonheffing = (parseFloat(ingehoudenLoonheffing) || 0) + (parseFloat(ingehoudenLoonheffingPartner) || 0);
+  const teBetalenOntvangen = totaalIngehoudenLoonheffing - nettoBelasting;
+  const kindgebondenBudget = berekenKindgebondenBudget(totaalBox1Inkomen, aantalKinderen);
+  const kinderbijslag = berekenKinderbijslag(kinderenLeeftijden);
+  const kinderopvangtoeslag = berekenKinderopvangtoeslag(totaalBox1Inkomen, kindOpvang);
+  setResultaten({
+    persoon1: {box1: box1P1, kortingen: kortingen1, iack: iackTotaal > 0 && (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iackTotaal : 0},
+    persoon2: {box1: box1P2, kortingen: kortingen2, iack: iackTotaal > 0 && fiscaalPartner && (parseFloat(brutoLoonPartner) || 0) < (parseFloat(brutoLoon) || 0) ? iackTotaal : 0},
+    box3,
+    totaal: {
+      box1Inkomen: totaalBox1Inkomen,
+      box1Belasting: totaalBox1Belasting,
+      box3Belasting: totaalBox3Belasting,
+      brutoBelasting,
+      heffingskortingen: totaalHeffingskortingen,
+      nettoBelasting,
+      ingehoudenLoonheffing: totaalIngehoudenLoonheffing,
+      teBetalenOntvangen,
+      kindgebondenBudget,
+      kinderbijslag,
+      kinderopvangtoeslag,
+      verzamelinkomen: totaalBox1Inkomen,
+      iackTotaal
+    }
+  });
+  setActiveTab('resultaten');
+};
 
       const formatEuro = (bedrag) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(bedrag);
 
