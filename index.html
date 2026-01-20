@@ -345,9 +345,9 @@
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
                 <div className="flex items-center gap-3 mb-2">
                   <Calculator className="w-8 h-8" />
-                  <h1 className="text-3xl font-bold">Belasting en Toeslagen Calculator 2026</h1>
+                  <h1 className="text-3xl font-bold">Belastingen en toeslagen calculator 2026</h1>
                 </div>
-                <p className="text-blue-100">Bereken uw Nederlandse belasting en toeslagen voor het jaar 2026</p>
+                <p className="text-blue-100">Bereken uw Nederlandse belastingen en toeslagen voor het jaar 2026</p>
               </div>
               <div className="border-b border-gray-200">
                 <div className="flex">
@@ -452,12 +452,12 @@
                         </div>
                       )}
                     </div>
-                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded"><p className="text-sm text-gray-700"><strong>Let op:</strong> Heffingsvrij vermogen is €57.684 per persoon (gezamenlijk €115.368 bij partner). Schuldendrempel €3.800 per persoon (€7.600 bij partner).</p></div>
+                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded"><p className="text-sm text-gray-700"><strong>Let op:</strong> Heffingsvrij vermogen is €59.357 per persoon (gezamenlijk €118.714 bij fiscaal partner). Schuldendrempel €3.800 per persoon (€7.600 bij partner).</p></div>
                   </div>
                 )}
                 {activeTab === 'resultaten' && resultaten && (
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekening Resultaten 2026</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekening resultaten 2026</h2>
                     <div className="bg-blue-50 p-6 rounded-lg">
                       <h3 className="text-xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -487,7 +487,7 @@
                       <div className="bg-teal-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderopvangtoeslag</h3><p className="text-sm text-gray-600">Jaarlijkse kinderopvangtoeslag:</p><p className="text-2xl font-bold text-teal-700">{formatEuro(resultaten.totaal.kinderopvangtoeslag)}</p><p className="text-xs text-gray-500 mt-2">Gebaseerd op ingevoerde uren en type opvang</p></div>
                     </>)}
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-lg text-white">
-                      <h3 className="text-2xl font-bold mb-6">Eindresultaat Aangifte 2026</h3>
+                      <h3 className="text-2xl font-bold mb-6">Eindresultaat aangifte 2026</h3>
                       <div className="space-y-3">
                         <div className="flex justify-between items-center"><span>Bruto belasting (Box 1 + Box 3):</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.brutoBelasting)}</span></div>
                         <div className="flex justify-between items-center"><span>Totaal heffingskortingen:</span><span className="text-xl font-bold">- {formatEuro(resultaten.totaal.heffingskortingen)}</span></div>
@@ -499,11 +499,11 @@
                     <div className="bg-gray-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4">Samenvatting</h3><ul className="space-y-2 text-sm text-gray-700"><li>• Te {resultaten.totaal.teBetalenOntvangen >= 0 ? 'ontvangen' : 'betalen'} Belastingdienst: <span className={resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-700' : 'text-red-700'}>{formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}</span></li>{aantalKinderen > 0 && (<><li>• Kinderopvangtoeslag (jaarlijks): {formatEuro(resultaten.totaal.kinderopvangtoeslag)}</li><li>• Kindgebonden budget (jaarlijks): {formatEuro(resultaten.totaal.kindgebondenBudget)}</li><li>• Kinderbijslag (jaarlijks): {formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</li></>)}</ul></div>
                   </div>
                 )}
-                {activeTab === 'resultaten' && !resultaten && (<div className="text-center py-12"><Calculator className="w-16 h-16 mx-auto text-gray-400 mb-4" /><p className="text-gray-600 text-lg mb-2">Nog geen berekening uitgevoerd</p><p className="text-gray-500 text-sm">Vul eerst alle gegevens in en klik op Bereken belasting</p></div>)}
+                {activeTab === 'resultaten' && !resultaten && (<div className="text-center py-12"><Calculator className="w-16 h-16 mx-auto text-gray-400 mb-4" /><p className="text-gray-600 text-lg mb-2">Nog geen berekening uitgevoerd</p><p className="text-gray-500 text-sm">Vul eerst alle gegevens in en klik op bereken belasting</p></div>)}
               </div>
-              {activeTab !== 'resultaten' && (<div className="bg-gray-50 px-6 py-4 border-t border-gray-200"><button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl"><Calculator className="inline w-6 h-6 mr-2" />Bereken belasting en toeslagen</button></div>)}
+              {activeTab !== 'resultaten' && (<div className="bg-gray-50 px-6 py-4 border-t border-gray-200"><button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl"><Calculator className="inline w-6 h-6 mr-2" />Bereken belastingen en toeslagen</button></div>)}
             </div>
-            <div className="mt-6 text-center text-sm text-gray-600 bg-white p-4 rounded-lg shadow"><p><strong>Disclaimer:</strong> Deze calculator is bedoeld voor indicatieve doeleinden. De werkelijke belasting kan afwijken. Voor officiële berekeningen, raadpleeg de Belastingdienst of een belastingadviseur.</p><p className="mt-2 text-xs">Tarieven en regelgeving 2026 zijn gebaseerd op beschikbare informatie per januari 2026.</p></div>
+            <div className="mt-6 text-center text-sm text-gray-600 bg-white p-4 rounded-lg shadow"><p><strong>Disclaimer:</strong> Deze tool is bedoeld voor indicatieve doeleinden. De werkelijke belasting kan afwijken. Voor officiële berekeningen, raadpleeg de Belastingdienst of een belastingadviseur.</p><p className="mt-2 text-xs">Tarieven en regelgeving 2026 zijn gebaseerd op beschikbare informatie per januari 2026.</p></div>
           </div>
         </div>
       );
