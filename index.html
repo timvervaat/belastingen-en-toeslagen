@@ -3,553 +3,386 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belastingen en toeslagen 2026</title>
-  <style>
-    body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      line-height: 1.6;
-      font-size: 16px;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 30px 20px;
-      background: #fff;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      color: #003087;
-      font-size: 2.4rem;
-      margin-bottom: 1rem;
-      font-weight: 700;
-    }
-    p.intro {
-      font-size: 1.125rem;
-      color: #444;
-      margin-bottom: 2rem;
-    }
-    h2 {
-      color: #003087;
-      font-size: 1.75rem;
-      margin: 2rem 0 1rem;
-      border-bottom: 2px solid #e0e0e0;
-      padding-bottom: 0.5rem;
-    }
-    label {
-      display: block;
-      margin: 1rem 0 0.4rem;
-      font-weight: 600;
-      font-size: 1.05rem;
-    }
-    input[type="number"], select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #003087;
-      color: white;
-      border: none;
-      padding: 0.9rem 2rem;
-      font-size: 1.1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 1.5rem 0;
-    }
-    button:hover {
-      background-color: #002060;
-    }
-    #result {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
-    .section {
-      margin-bottom: 2.5rem;
-    }
-    .disclaimer {
-      font-size: 0.95rem;
-      color: #c00;
-      background: #fff5f5;
-      border: 1px solid #ffb3b3;
-      padding: 1rem;
-      border-radius: 4px;
-      margin-top: 2rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1.5rem 0;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 0.8rem;
-      text-align: left;
-    }
-    th {
-      background: #e6f0ff;
-      font-weight: 600;
-    }
-    .hidden { display: none; }
-    .child-group {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      background: #fdfdfd;
-    }
-  </style>
+  <title>Belasting & Toeslagen Calculator 2026</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+    const Calculator = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="8" y1="14" x2="8" y2="18"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/></svg>);
+    const Users = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>);
+    const Home = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
+    const Baby = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/></svg>);
+    const Euro = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>);
+    const TrendingUp = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>);
+    const FileText = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
 
-<div class="container">
-  <h1>Belastingen en toeslagen 2026</h1>
-  <p class="intro">Vul hieronder de gegevens in voor een berekening van de te ontvangen of te betalen belastingen en toeslagen over 2026.</p>
+    function BelastingCalculator() {
+      const [fiscaalPartner, setFiscaalPartner] = useState(false);
+      const [aantalKinderen, setAantalKinderen] = useState(0);
+      const [kinderenLeeftijden, setKinderenLeeftijden] = useState([]);
+      const [adres, setAdres] = useState('');
+      const [postcode, setPostcode] = useState('');
+      const [wozWaarde, setWozWaarde] = useState('');
+      const [wozLoading, setWozLoading] = useState(false);
+      const [brutoLoon, setBrutoLoon] = useState('');
+      const [brutoLoonPartner, setBrutoLoonPartner] = useState('');
+      const [eigenWoningRente, setEigenWoningRente] = useState('');
+      const [eigenWoningRentePartner, setEigenWoningRentePartner] = useState('');
+      const [arbeidsongeschiktheid, setArbeidsongeschiktheid] = useState('');
+      const [arbeidsongeschiktheidPartner, setArbeidsongeschiktheidPartner] = useState('');
+      const [bankrekeningen, setBankrekeningen] = useState('');
+      const [bankrekeningenPartner, setBankrekeningenPartner] = useState('');
+      const [beleggingen, setBeleggingen] = useState('');
+      const [beleggingenPartner, setBeleggingenPartner] = useState('');
+      const [schulden, setSchulden] = useState('');
+      const [schuldenPartner, setSchuldenPartner] = useState('');
+      const [ingehoudenLoonheffing, setIngehoudenLoonheffing] = useState('');
+      const [ingehoudenLoonheffingPartner, setIngehoudenLoonheffingPartner] = useState('');
+      const [resultaten, setResultaten] = useState(null);
+      const [activeTab, setActiveTab] = useState('stamgegevens');
 
-  <div class="section">
-    <h2>Persoonlijke situatie</h2>
-    <label>Fiscaal partner?</label>
-    <select id="partner" onchange="togglePartnerFields()">
-      <option value="nee">Nee (alleenstaand)</option>
-      <option value="ja">Ja</option>
-    </select>
+      const updateAantalKinderen = (aantal) => {
+        setAantalKinderen(aantal);
+        const nieuweLeeftijden = [];
+        for (let i = 0; i < aantal; i++) {
+          nieuweLeeftijden.push(kinderenLeeftijden[i] || 10);
+        }
+        setKinderenLeeftijden(nieuweLeeftijden);
+      };
 
-    <div id="partnerAges" class="hidden">
-      <label>Leeftijd partner 1 (in 2026)</label>
-      <input type="number" id="leeftijdPartner1" min="0" max="120" value="40">
+      const updateKindLeeftijd = (index, leeftijd) => {
+        const nieuweLeeftijden = [...kinderenLeeftijden];
+        nieuweLeeftijden[index] = parseInt(leeftijd) || 0;
+        setKinderenLeeftijden(nieuweLeeftijden);
+      };
 
-      <label>Leeftijd partner 2 (in 2026)</label>
-      <input type="number" id="leeftijdPartner2" min="0" max="120" value="40">
-    </div>
+      const haalWozWaarde = async () => {
+        if (!adres || !postcode) {
+          alert('Vul eerst een adres en postcode in');
+          return;
+        }
+        setWozLoading(true);
+        setTimeout(() => {
+          const gesimuleerdeWoz = Math.floor(Math.random() * 200000) + 250000;
+          setWozWaarde(gesimuleerdeWoz.toString());
+          setWozLoading(false);
+          alert('WOZ-waarde opgehaald (gesimuleerd): €' + gesimuleerdeWoz.toLocaleString('nl-NL'));
+        }, 1500);
+      };
 
-    <label>Aantal kinderen onder 18 jaar</label>
-    <input type="number" id="kinderen" min="0" max="10" value="0" onchange="generateChildFields()">
+      const berekenKinderbijslag = (leeftijden) => {
+        let totaalJaar = 0;
+        const details = [];
+        leeftijden.forEach((leeftijd, index) => {
+          let kwartaalBedrag = 0;
+          let percentage = '';
+          if (leeftijd >= 0 && leeftijd <= 5) {
+            kwartaalBedrag = 295.07;
+            percentage = '70%';
+          } else if (leeftijd >= 6 && leeftijd <= 11) {
+            kwartaalBedrag = 358.30;
+            percentage = '85%';
+          } else if (leeftijd >= 12 && leeftijd <= 17) {
+            kwartaalBedrag = 421.53;
+            percentage = '100%';
+          }
+          const jaarBedrag = kwartaalBedrag * 4;
+          totaalJaar += jaarBedrag;
+          details.push({kind: index + 1, leeftijd, percentage, kwartaal: kwartaalBedrag, jaar: jaarBedrag});
+        });
+        return { totaalJaar, details };
+      };
 
-    <div id="childFields"></div>
+      const berekenBox1 = (brutoInkomen, eigenwoningRente, ao) => {
+        const inkomen = parseFloat(brutoInkomen) || 0;
+        const rente = parseFloat(eigenwoningRente) || 0;
+        const aoVerzekering = parseFloat(ao) || 0;
+        const wozWaardeNum = parseFloat(wozWaarde) || 0;
+        const eigenwoningforfait = wozWaardeNum > 0 ? wozWaardeNum * 0.0035 : 0;
+        const box1Inkomen = inkomen - rente - aoVerzekering + eigenwoningforfait;
+        let belasting = 0;
+        if (box1Inkomen > 78426) {
+          belasting += (box1Inkomen - 78426) * 0.495;
+          belasting += (78426 - 38883) * 0.3756;
+          belasting += 38883 * 0.3575;
+        } else if (box1Inkomen > 38883) {
+          belasting += (box1Inkomen - 38883) * 0.3756;
+          belasting += 38883 * 0.3575;
+        } else if (box1Inkomen > 0) {
+          belasting += box1Inkomen * 0.3575;
+        }
+        return { box1Inkomen, belasting };
+      };
 
-    <label>WOZ-waarde woning (peildatum 1-1-2025, €)</label>
-    <input type="number" id="woz" min="0" value="0">
+      const berekenBox3 = (bank, beleg, schuld) => {
+        const banktegoeden = parseFloat(bank) || 0;
+        const beleggingsVermogen = parseFloat(beleg) || 0;
+        const schuldenBedrag = parseFloat(schuld) || 0;
+        const heffingsVrijVermogen = 57684;
+        const totaalBezittingen = banktegoeden + beleggingsVermogen;
+        const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrijVermogen - Math.max(0, schuldenBedrag - 3800));
+        const rendementBank = banktegoeden * 0.0128;
+        const rendementBeleggingen = beleggingsVermogen * 0.06;
+        const rendementSchulden = schuldenBedrag > 3800 ? (schuldenBedrag - 3800) * 0.027 : 0;
+        const belastbaarRendement = Math.max(0, rendementBank + rendementBeleggingen - rendementSchulden);
+        const box3Belasting = belastbaarRendement * 0.36;
+        return { belastbaarVermogen, belastbaarRendement, box3Belasting };
+      };
 
-    <label>Huurt u? (anders geen huurtoeslag)</label>
-    <select id="huurt" onchange="toggleHuurSection()">
-      <option value="nee">Nee</option>
-      <option value="ja">Ja</option>
-    </select>
-  </div>
+      const berekenHeffingskortingen = (verzamelinkomen, arbeidsinkomen) => {
+        let ahk = 3115;
+        if (verzamelinkomen > 29736) {
+          const afbouw = (verzamelinkomen - 29736) * 0.06398;
+          ahk = Math.max(0, ahk - afbouw);
+        }
+        let ak = 0;
+        if (arbeidsinkomen > 0) {
+          if (arbeidsinkomen <= 11491) {
+            ak = arbeidsinkomen * 0.08425;
+          } else if (arbeidsinkomen <= 25142) {
+            ak = 968 + (arbeidsinkomen - 11491) * 0.34503;
+          } else if (arbeidsinkomen <= 45592) {
+            ak = 5685;
+          } else if (arbeidsinkomen <= 132920) {
+            ak = Math.max(0, 5685 - (arbeidsinkomen - 45592) * 0.0651);
+          }
+        }
+        return { ahk, ak };
+      };
 
-  <div class="section hidden" id="huurSection">
-    <h2>Wonen & Huur</h2>
-    <label>Kale huur per maand (€, excl. servicekosten)</label>
-    <input type="number" id="huur" min="0" value="700">
+      const berekenIACK = (arbeidsinkomen, aantalKinderenParam) => {
+        if (aantalKinderenParam === 0 || arbeidsinkomen < 6239) return 0;
+        let iack = 0;
+        if (arbeidsinkomen >= 6239) {
+          iack = 3032 * 0.115 * aantalKinderenParam;
+          iack = Math.min(3032, iack);
+        }
+        return iack;
+      };
 
-    <label>Leeftijd hoofd-huurder</label>
-    <select id="huurLeeftijd">
-      <option value="onder21">Onder 21</option>
-      <option value="21plus" selected>21 of ouder</option>
-    </select>
-  </div>
+      const berekenKindgebondenBudget = (verzamelinkomen, aantalKinderenParam, vermogen) => {
+        if (aantalKinderenParam === 0) return 0;
+        const maxVermogen = 184633;
+        if (vermogen > maxVermogen) return 0;
+        let budget = 0;
+        const basisBedragPerKind = 1259;
+        if (fiscaalPartner) {
+          if (verzamelinkomen <= 39141) {
+            budget = basisBedragPerKind * aantalKinderenParam * 12;
+          } else {
+            const afbouw = (verzamelinkomen - 39141) * 0.075;
+            budget = Math.max(0, (basisBedragPerKind * aantalKinderenParam * 12) - afbouw);
+          }
+        } else {
+          if (verzamelinkomen <= 29736) {
+            budget = basisBedragPerKind * aantalKinderenParam * 12;
+          } else {
+            const afbouw = (verzamelinkomen - 29736) * 0.075;
+            budget = Math.max(0, (basisBedragPerKind * aantalKinderenParam * 12) - afbouw);
+          }
+        }
+        return budget;
+      };
 
-  <div class="section">
-    <h2>Inkomen & Loon (box 1)</h2>
-    <label>Bruto jaarloon partner 1 (€)</label>
-    <input type="number" id="brutoloon1" min="0" value="40000">
+      const berekenAlles = () => {
+        const box1Persoon1 = berekenBox1(brutoLoon, eigenWoningRente, arbeidsongeschiktheid);
+        const box3Persoon1 = berekenBox3(bankrekeningen, beleggingen, schulden);
+        let box1Persoon2 = { box1Inkomen: 0, belasting: 0 };
+        let box3Persoon2 = { belastbaarVermogen: 0, belastbaarRendement: 0, box3Belasting: 0 };
+        if (fiscaalPartner) {
+          box1Persoon2 = berekenBox1(brutoLoonPartner, eigenWoningRentePartner, arbeidsongeschiktheidPartner);
+          box3Persoon2 = berekenBox3(bankrekeningenPartner, beleggingenPartner, schuldenPartner);
+        }
+        const totaalBox1Inkomen = box1Persoon1.box1Inkomen + box1Persoon2.box1Inkomen;
+        const totaalBox1Belasting = box1Persoon1.belasting + box1Persoon2.belasting;
+        const totaalBox3Belasting = box3Persoon1.box3Belasting + box3Persoon2.box3Belasting;
+        const totaalVermogen = box3Persoon1.belastbaarVermogen + box3Persoon2.belastbaarVermogen;
+        const verzamelinkomen = totaalBox1Inkomen + box3Persoon1.belastbaarRendement + box3Persoon2.belastbaarRendement;
+        const arbeidsinkomen = (parseFloat(brutoLoon) || 0) + (parseFloat(brutoLoonPartner) || 0);
+        const kortingen1 = berekenHeffingskortingen(verzamelinkomen, parseFloat(brutoLoon) || 0);
+        const kortingen2 = fiscaalPartner ? berekenHeffingskortingen(verzamelinkomen, parseFloat(brutoLoonPartner) || 0) : { ahk: 0, ak: 0 };
+        const iack1 = berekenIACK(parseFloat(brutoLoon) || 0, aantalKinderen);
+        const iack2 = fiscaalPartner ? berekenIACK(parseFloat(brutoLoonPartner) || 0, aantalKinderen) : 0;
+        const totaalHeffingskortingen = kortingen1.ahk + kortingen1.ak + kortingen2.ahk + kortingen2.ak + iack1 + iack2;
+        const brutoBelasting = totaalBox1Belasting + totaalBox3Belasting;
+        const nettoBelasting = Math.max(0, brutoBelasting - totaalHeffingskortingen);
+        const totaalIngehoudenLoonheffing = (parseFloat(ingehoudenLoonheffing) || 0) + (parseFloat(ingehoudenLoonheffingPartner) || 0);
+        const teBetalenOntvangen = totaalIngehoudenLoonheffing - nettoBelasting;
+        const kindgebondenBudget = berekenKindgebondenBudget(verzamelinkomen, aantalKinderen, totaalVermogen);
+        const kinderbijslag = berekenKinderbijslag(kinderenLeeftijden);
+        setResultaten({
+          persoon1: {box1: box1Persoon1, box3: box3Persoon1, kortingen: kortingen1, iack: iack1},
+          persoon2: {box1: box1Persoon2, box3: box3Persoon2, kortingen: kortingen2, iack: iack2},
+          totaal: {box1Belasting: totaalBox1Belasting, box3Belasting: totaalBox3Belasting, brutoBelasting, heffingskortingen: totaalHeffingskortingen, nettoBelasting, ingehoudenLoonheffing: totaalIngehoudenLoonheffing, teBetalenOntvangen, kindgebondenBudget, kinderbijslag, verzamelinkomen}
+        });
+        setActiveTab('resultaten');
+      };
 
-    <div id="partner2Inkomen" class="hidden">
-      <label>Bruto jaarloon partner 2 (€)</label>
-      <input type="number" id="brutoloon2" min="0" value="0">
-    </div>
+      const formatEuro = (bedrag) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(bedrag);
 
-    <label>Betaalde loonbelasting partner 1 (€, schatting)</label>
-    <input type="number" id="loonbel1" min="0" value="8000">
-
-    <div id="partner2Loonbel" class="hidden">
-      <label>Betaalde loonbelasting partner 2 (€, schatting)</label>
-      <input type="number" id="loonbel2" min="0" value="0">
-    </div>
-
-    <label>Betaalde rente hypotheek gedurende het jaar (€, totaal)</label>
-    <input type="number" id="hypotheekrente" min="0" value="0">
-  </div>
-
-  <div class="section">
-    <h2>Vermogen (box 3, peildatum 1 jan 2026)</h2>
-    <label>Bank- & spaartegoeden (€)</label>
-    <input type="number" id="spaargeld" min="0" value="10000">
-
-    <label>Beleggingen / overig vermogen (€, aandelen, 2e huis etc.)</label>
-    <input type="number" id="overigVermogen" min="0" value="0">
-
-    <label>Schulden (niet eigenwoning, >€3.400 drempel)</label>
-    <input type="number" id="schulden" min="0" value="0">
-  </div>
-
-  <button onclick="bereken()">Bereken schatting 2026</button>
-
-  <div id="result"></div>
-
-  <div class="disclaimer">
-    <strong>Disclaimer – Dit is GEEN officiële berekening!</strong><br>
-    Alleen een schatting op basis van bekende 2026-regels (jan 2026). Geen rekening met alle aftrekken, alleenstaande-ouderkorting, etc. Gebruik altijd de officiële proefberekening op <a href="https://www.belastingdienst.nl/rekenhulpen" target="_blank">belastingdienst.nl</a> of <a href="https://www.toeslagen.nl/proefberekening" target="_blank">toeslagen.nl</a>.
-  </div>
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+                <div className="flex items-center gap-3 mb-2">
+                  <Calculator className="w-8 h-8" />
+                  <h1 className="text-3xl font-bold">Belasting en Toeslagen Calculator 2026</h1>
+                </div>
+                <p className="text-blue-100">Bereken uw Nederlandse belasting en toeslagen voor het jaar 2026</p>
+              </div>
+              <div className="border-b border-gray-200">
+                <div className="flex">
+                  <button onClick={() => setActiveTab('stamgegevens')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'stamgegevens' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Users className="inline mr-2 w-5 h-5" />Stamgegevens</button>
+                  <button onClick={() => setActiveTab('box1')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box1' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Euro className="inline mr-2 w-5 h-5" />Box 1</button>
+                  <button onClick={() => setActiveTab('box3')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box3' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><TrendingUp className="inline mr-2 w-5 h-5" />Box 3</button>
+                  <button onClick={() => setActiveTab('resultaten')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'resultaten' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><FileText className="inline mr-2 w-5 h-5" />Resultaten</button>
+                </div>
+              </div>
+              <div className="p-6">
+                {activeTab === 'stamgegevens' && (
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Stamgegevens</h2>
+                    <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                      <label className="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" checked={fiscaalPartner} onChange={(e) => setFiscaalPartner(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                        <span className="font-semibold text-gray-800">Fiscaal partner</span>
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2"><Baby className="inline w-4 h-4 mr-1" />Aantal kinderen</label>
+                      <input type="number" min="0" value={aantalKinderen} onChange={(e) => updateAantalKinderen(parseInt(e.target.value) || 0)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    {aantalKinderen > 0 && (
+                      <div className="bg-purple-50 p-4 rounded-lg space-y-3">
+                        <h3 className="font-semibold text-gray-800">Leeftijden kinderen (voor kinderbijslag)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Array.from({ length: aantalKinderen }).map((_, index) => (
+                            <div key={index}>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Leeftijd kind {index + 1} (0-17 jaar)</label>
+                              <input type="number" min="0" max="17" value={kinderenLeeftijden[index] || ''} onChange={(e) => updateKindLeeftijd(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 10" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                      <h3 className="font-semibold text-gray-800 flex items-center"><Home className="w-5 h-5 mr-2" />WOZ-waarde eigen woning</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label className="block text-sm font-medium text-gray-700 mb-2">Adres</label><input type="text" value={adres} onChange={(e) => setAdres(e.target.value)} placeholder="Straatnaam en huisnummer" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" /></div>
+                        <div><label className="block text-sm font-medium text-gray-700 mb-2">Postcode</label><input type="text" value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="1234 AB" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" /></div>
+                      </div>
+                      <button onClick={haalWozWaarde} disabled={wozLoading} className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400">{wozLoading ? 'Bezig met ophalen...' : 'Haal WOZ-waarde op'}</button>
+                      <div><label className="block text-sm font-medium text-gray-700 mb-2">WOZ-waarde (€)</label><input type="number" value={wozWaarde} onChange={(e) => setWozWaarde(e.target.value)} placeholder="Handmatig invoeren indien bekend" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" /></div>
+                    </div>
+                  </div>
+                )}
+                {activeTab === 'box1' && (
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
+                        <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoon} onChange={(e) => setBrutoLoon(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRente} onChange={(e) => setEigenWoningRente(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="8000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheid} onChange={(e) => setArbeidsongeschiktheid(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="2000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffing} onChange={(e) => setIngehoudenLoonheffing(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="15000" /></div>
+                      </div>
+                      {fiscaalPartner && (
+                        <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
+                          <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoonPartner} onChange={(e) => setBrutoLoonPartner(e.target.value)} className="w-fullpx-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="40000" /></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRentePartner} onChange={(e) => setEigenWoningRentePartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheidPartner} onChange={(e) => setArbeidsongeschiktheidPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffingPartner} onChange={(e) => setIngehoudenLoonheffingPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="12000" /></div>
 </div>
-
-<script>
-// Dynamische velden
-function togglePartnerFields() {
-  const partner = document.getElementById('partner').value === 'ja';
-  document.getElementById('partnerAges').classList.toggle('hidden', !partner);
-  document.getElementById('partner2Inkomen').classList.toggle('hidden', !partner);
-  document.getElementById('partner2Loonbel').classList.toggle('hidden', !partner);
+)}
+</div>
+</div>
+)}
+{activeTab === 'box3' && (
+<div className="space-y-6">
+<h2 className="text-2xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h2>
+<p className="text-sm text-gray-600 mb-4">Peildatum: 1 januari 2026</p>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div className="space-y-4 bg-blue-50 p-6 rounded-lg">
+<h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningen} onChange={(e) => setBankrekeningen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingen} onChange={(e) => setBeleggingen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schulden} onChange={(e) => setSchulden(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="10000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
+</div>
+{fiscaalPartner && (
+<div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
+<h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningenPartner} onChange={(e) => setBankrekeningenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="20000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingenPartner} onChange={(e) => setBeleggingenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
+<div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schuldenPartner} onChange={(e) => setSchuldenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="5000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
+</div>
+)}
+</div>
+<div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded"><p className="text-sm text-gray-700"><strong>Let op:</strong> Heffingsvrij vermogen is €57.684 per persoon. De schuldendrempel is €3.800.</p></div>
+</div>
+)}
+{activeTab === 'resultaten' && resultaten && (
+<div className="space-y-6">
+<h2 className="text-2xl font-bold text-gray-800 mb-4">Berekening Resultaten 2026</h2>
+<div className="bg-blue-50 p-6 rounded-lg">
+<h3 className="text-xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h3>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div><p className="text-sm text-gray-600">Persoon 1 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p></div>
+{fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p></div>)}
+</div>
+<div className="mt-4 pt-4 border-t border-blue-200"><p className="text-sm text-gray-600">Totaal Box 1 belasting:</p><p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.box1Belasting)}</p></div>
+</div>
+<div className="bg-green-50 p-6 rounded-lg">
+<h3 className="text-xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h3>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div><p className="text-sm text-gray-600">Persoon 1 - Belastbaar vermogen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box3.belastbaarVermogen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 3 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box3.box3Belasting)}</p></div>
+{fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Belastbaar vermogen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box3.belastbaarVermogen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 3 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box3.box3Belasting)}</p></div>)}
+</div>
+<div className="mt-4 pt-4 border-t border-green-200"><p className="text-sm text-gray-600">Totaal Box 3 belasting:</p><p className="text-2xl font-bold text-green-700">{formatEuro(resultaten.totaal.box3Belasting)}</p></div>
+</div>
+<div className="bg-purple-50 p-6 rounded-lg">
+<h3 className="text-xl font-bold text-gray-800 mb-4">Heffingskortingen</h3>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div><p className="text-sm text-gray-600">Persoon 1 - Algemene heffingskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.kortingen.ahk)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Arbeidskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.kortingen.ak)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - IACK:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.iack)}</p></div>
+{fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Algemene heffingskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.kortingen.ahk)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Arbeidskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.kortingen.ak)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - IACK:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.iack)}</p></div>)}
+</div>
+<div className="mt-4 pt-4 border-t border-purple-200"><p className="text-sm text-gray-600">Totaal heffingskortingen:</p><p className="text-2xl font-bold text-purple-700">{formatEuro(resultaten.totaal.heffingskortingen)}</p></div>
+</div>
+{aantalKinderen > 0 && (<>
+<div className="bg-pink-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kindgebonden budget</h3><p className="text-sm text-gray-600">Jaarlijks kindgebonden budget ({aantalKinderen} {aantalKinderen === 1 ? 'kind' : 'kinderen'}):</p><p className="text-2xl font-bold text-pink-700">{formatEuro(resultaten.totaal.kindgebondenBudget)}</p><p className="text-xs text-gray-500 mt-2">Dit bedrag ontvangt u maandelijks via de Belastingdienst Toeslagen</p></div>
+<div className="bg-indigo-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderbijslag</h3><p className="text-sm text-gray-600 mb-3">Kinderbijslag per kind (uitbetaald per kwartaal door SVB):</p><div className="space-y-2 mb-4">{resultaten.totaal.kinderbijslag.details.map((detail) => (<div key={detail.kind} className="flex justify-between text-sm bg-white p-2 rounded"><span>Kind {detail.kind} ({detail.leeftijd} jaar, {detail.percentage}):</span><span className="font-semibold">{formatEuro(detail.kwartaal)} /kwartaal</span></div>))}</div><div className="pt-3 border-t border-indigo-200"><p className="text-sm text-gray-600">Totaal kinderbijslag per jaar:</p><p className="text-2xl font-bold text-indigo-700">{formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</p></div></div>
+</>)}
+<div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-lg text-white">
+<h3 className="text-2xl font-bold mb-6">Eindresultaat Aangifte 2026</h3>
+<div className="space-y-3">
+<div className="flex justify-between items-center"><span>Bruto belasting (Box 1 + Box 3):</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.brutoBelasting)}</span></div>
+<div className="flex justify-between items-center"><span>Totaal heffingskortingen:</span><span className="text-xl font-bold">- {formatEuro(resultaten.totaal.heffingskortingen)}</span></div>
+<div className="border-t border-blue-400 pt-3 flex justify-between items-center"><span className="font-semibold">Netto te betalen belasting:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.nettoBelasting)}</span></div>
+<div className="flex justify-between items-center"><span>Ingehouden loonheffing:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</span></div>
+<div className="border-t-2 border-white pt-4 mt-4"><div className="flex justify-between items-center"><span className="text-xl font-bold">{resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen:' : 'Te betalen:'}</span><span className={'text-3xl font-bold ' + (resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-300' : 'text-red-300')}>{formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}</span></div></div>
+</div>
+</div>
+<div className="bg-gray-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4">Samenvatting</h3><ul className="space-y-2 text-sm text-gray-700"><li>• Verzamelinkomen: {formatEuro(resultaten.totaal.verzamelinkomen)}</li><li>• Box 1 belasting: {formatEuro(resultaten.totaal.box1Belasting)}</li><li>• Box 3 belasting: {formatEuro(resultaten.totaal.box3Belasting)}</li><li>• Totale heffingskortingen: {formatEuro(resultaten.totaal.heffingskortingen)}</li>{aantalKinderen > 0 && (<><li>• Kindgebonden budget (jaarlijks): {formatEuro(resultaten.totaal.kindgebondenBudget)}</li><li>• Kinderbijslag (jaarlijks): {formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</li></>)}</ul></div>
+</div>
+)}
+{activeTab === 'resultaten' && !resultaten && (<div className="text-center py-12"><Calculator className="w-16 h-16 mx-auto text-gray-400 mb-4" /><p className="text-gray-600 text-lg mb-2">Nog geen berekening uitgevoerd</p><p className="text-gray-500 text-sm">Vul eerst alle gegevens in en klik op Bereken belasting</p></div>)}
+</div>
+{activeTab !== 'resultaten' && (<div className="bg-gray-50 px-6 py-4 border-t border-gray-200"><button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl"><Calculator className="inline w-6 h-6 mr-2" />Bereken belasting en toeslagen</button></div>)}
+</div>
+<div className="mt-6 text-center text-sm text-gray-600 bg-white p-4 rounded-lg shadow"><p><strong>Disclaimer:</strong> Deze calculator is bedoeld voor indicatieve doeleinden. De werkelijke belasting kan afwijken. De WOZ-waarde lookup is gesimuleerd. Voor officiële berekeningen, raadpleeg de Belastingdienst of een belastingadviseur.</p><p className="mt-2 text-xs">Tarieven en regelgeving 2026 zijn gebaseerd op beschikbare informatie per januari 2026.</p></div>
+</div>
+</div>
+);
 }
-
-function generateChildFields() {
-  const num = parseInt(document.getElementById('kinderen').value) || 0;
-  const container = document.getElementById('childFields');
-  container.innerHTML = '';
-  for (let i = 1; i <= num; i++) {
-    const div = document.createElement('div');
-    div.className = 'child-group';
-    div.innerHTML = `
-      <h3>Kind ${i}</h3>
-      <label>Leeftijd kind ${i} (in 2026)</label>
-      <input type="number" class="childLeeftijd" min="0" max="17" value="10">
-
-      <label>Soort opvang</label>
-      <select class="childOpvangType">
-        <option value="dagopvang">Dagopvang (€11,23/uur)</option>
-        <option value="bso">Buitenschoolse opvang (€9,98/uur)</option>
-        <option value="gastouder">Gastouderopvang (€8,49/uur)</option>
-      </select>
-
-      <label>Aantal uren opvang per maand (gemiddeld)</label>
-      <input type="number" class="childUren" min="0" value="0">
-    `;
-    container.appendChild(div);
-  }
-}
-
-function toggleHuurSection() {
-  const huurt = document.getElementById('huurt').value;
-  document.getElementById('huurSection').classList.toggle('hidden', huurt !== 'ja');
-}
-
-// Eigenwoningforfait 2026
-function berekenEigenwoningforfait(woz) {
-  if (woz <= 12500) return 0;
-  if (woz <= 25000) return woz * 0.0010;
-  if (woz <= 50000) return woz * 0.0020;
-  if (woz <= 75000) return woz * 0.0025;
-  if (woz <= 1350000) return woz * 0.0035;
-  return 4725 + (woz - 1350000) * 0.0235;
-}
-
-// AHK 2026
-function berekenAHK(verzamel) {
-  if (verzamel <= 28406) return 3068;
-  if (verzamel >= 76817) return 0;
-  return 3068 - 0.06337 * (verzamel - 28406);
-}
-
-// AK 2026
-function berekenAK(arbeids) {
-  if (arbeids <= 12169) return 0.08053 * arbeids;
-  if (arbeids <= 26288) return 980 + 0.3003 * (arbeids - 12169);
-  if (arbeids <= 43071) return 5220 + 0.02258 * (arbeids - 26288);
-  if (arbeids <= 129078) return 5599 - 0.0651 * (arbeids - 43071);
-  return 0;
-}
-
-// IACK 2026
-function berekenIACK(arbeids) {
-  if (arbeids <= 6145) return 0;
-  if (arbeids >= 32223) return 2986;
-  return 0.1145 * (arbeids - 6145);
-}
-
-// Kindgebonden budget 2026
-function berekenKindgebondenBudget(aantalKinderen, toetsingsinkomen, vermogenNaSchulden, partner) {
-  if (aantalKinderen === 0) return 0;
-
-  const vrijstellingBox3 = partner ? 2 * 184633 : 184633;
-  if (vermogenNaSchulden > vrijstellingBox3) return 0;
-
-  const maxPerKind = 2580;
-  let maxTotaal = aantalKinderen * maxPerKind;
-
-  const drempel = 39141;
-  let vermindering = 0;
-  if (toetsingsinkomen > drempel) {
-    vermindering = 0.076 * (toetsingsinkomen - drempel);
-  }
-
-  return Math.max(0, maxTotaal - vermindering);
-}
-
-// Kinderopvang percentages 2026
-const percentagesTable = [
-  { rangeStart: 0, rangeEnd: 24149, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 24150, rangeEnd: 25756, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 25757, rangeEnd: 27363, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 27364, rangeEnd: 28973, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 28974, rangeEnd: 30579, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 30580, rangeEnd: 32189, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 32190, rangeEnd: 33795, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 33796, rangeEnd: 35400, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 35401, rangeEnd: 37129, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 37130, rangeEnd: 38855, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 38856, rangeEnd: 40586, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 40587, rangeEnd: 42313, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 42314, rangeEnd: 44046, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 44047, rangeEnd: 45776, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 45777, rangeEnd: 47546, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 47547, rangeEnd: 49318, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 49319, rangeEnd: 51092, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 51093, rangeEnd: 52864, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 52865, rangeEnd: 54641, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 54642, rangeEnd: 56412, first: 96.0, subsequent: 96.0 },
-  { rangeStart: 56413, rangeEnd: 58184, first: 95.5, subsequent: 95.6 },
-  { rangeStart: 58185, rangeEnd: 59957, first: 94.8, subsequent: 95.6 },
-  { rangeStart: 59958, rangeEnd: 61895, first: 93.9, subsequent: 95.6 },
-  { rangeStart: 61896, rangeEnd: 65695, first: 92.4, subsequent: 95.6 },
-  { rangeStart: 65696, rangeEnd: 69492, first: 91.6, subsequent: 95.2 },
-  { rangeStart: 69493, rangeEnd: 73292, first: 90.5, subsequent: 94.6 },
-  { rangeStart: 73293, rangeEnd: 77094, first: 88.2, subsequent: 94.2 },
-  { rangeStart: 77095, rangeEnd: 80891, first: 85.9, subsequent: 93.9 },
-  { rangeStart: 80892, rangeEnd: 84693, first: 83.7, subsequent: 93.2 },
-  { rangeStart: 84694, rangeEnd: 88491, first: 81.2, subsequent: 92.7 },
-  { rangeStart: 88492, rangeEnd: 92291, first: 78.9, subsequent: 92.2 },
-  { rangeStart: 92292, rangeEnd: 96091, first: 76.7, subsequent: 91.5 },
-  { rangeStart: 96092, rangeEnd: 99889, first: 74.3, subsequent: 90.9 },
-  { rangeStart: 99890, rangeEnd: 103694, first: 72.1, subsequent: 90.5 },
-  { rangeStart: 103695, rangeEnd: 107492, first: 69.6, subsequent: 90.2 },
-  { rangeStart: 107493, rangeEnd: 111290, first: 67.3, subsequent: 89.5 },
-  { rangeStart: 111291, rangeEnd: 115090, first: 65.1, subsequent: 89.1 },
-  { rangeStart: 115091, rangeEnd: 118963, first: 62.7, subsequent: 88.6 },
-  { rangeStart: 118964, rangeEnd: 122857, first: 60.6, subsequent: 87.9 },
-  { rangeStart: 122858, rangeEnd: 126747, first: 58.5, subsequent: 87.4 },
-  { rangeStart: 126748, rangeEnd: 130638, first: 56.4, subsequent: 87.0 },
-  { rangeStart: 130639, rangeEnd: 134527, first: 54.2, subsequent: 86.7 },
-  { rangeStart: 134528, rangeEnd: 138420, first: 52.3, subsequent: 86.0 },
-  { rangeStart: 138421, rangeEnd: 142312, first: 50.4, subsequent: 85.4 },
-  { rangeStart: 142313, rangeEnd: 146205, first: 48.5, subsequent: 85.0 },
-  { rangeStart: 146206, rangeEnd: 150092, first: 46.5, subsequent: 84.4 },
-  { rangeStart: 150093, rangeEnd: 153982, first: 44.5, subsequent: 84.0 },
-  { rangeStart: 153983, rangeEnd: 157877, first: 42.5, subsequent: 83.3 },
-  { rangeStart: 157878, rangeEnd: 161766, first: 40.5, subsequent: 82.7 },
-  { rangeStart: 161767, rangeEnd: 165657, first: 38.5, subsequent: 81.7 },
-  { rangeStart: 165658, rangeEnd: 169547, first: 36.5, subsequent: 81.4 },
-  { rangeStart: 169548, rangeEnd: 173440, first: 36.5, subsequent: 80.6 },
-  { rangeStart: 173441, rangeEnd: 177335, first: 36.5, subsequent: 79.7 },
-  { rangeStart: 177336, rangeEnd: 181223, first: 36.5, subsequent: 79.1 },
-  { rangeStart: 181224, rangeEnd: 185114, first: 36.5, subsequent: 78.2 },
-  { rangeStart: 185115, rangeEnd: 189002, first: 36.5, subsequent: 77.7 },
-  { rangeStart: 189003, rangeEnd: 192896, first: 36.5, subsequent: 76.9 },
-  { rangeStart: 192897, rangeEnd: 196789, first: 36.5, subsequent: 76.2 },
-  { rangeStart: 196790, rangeEnd: 200681, first: 36.5, subsequent: 75.5 },
-  { rangeStart: 200682, rangeEnd: 204571, first: 36.5, subsequent: 74.5 },
-  { rangeStart: 204572, rangeEnd: 208458, first: 36.5, subsequent: 74.0 },
-  { rangeStart: 208459, rangeEnd: 212353, first: 36.5, subsequent: 73.3 },
-  { rangeStart: 212354, rangeEnd: 216242, first: 36.5, subsequent: 72.5 },
-  { rangeStart: 216243, rangeEnd: 220134, first: 36.5, subsequent: 71.8 },
-  { rangeStart: 220135, rangeEnd: 224026, first: 36.5, subsequent: 71.2 },
-  { rangeStart: 224027, rangeEnd: 227915, first: 36.5, subsequent: 70.4 },
-  { rangeStart: 227916, rangeEnd: 231807, first: 36.5, subsequent: 69.6 },
-  { rangeStart: 231808, rangeEnd: 235697, first: 36.5, subsequent: 69.1 },
-  { rangeStart: 235698, rangeEnd: Infinity, first: 36.5, subsequent: 68.2 }
-];
-
-const maxHourlyRates = {
-  dagopvang: 11.23,
-  bso: 9.98,
-  gastouder: 8.49
-};
-
-function findPercentage(toetsingsinkomen, isFirstChild) {
-  for (let entry of percentagesTable) {
-    if (toetsingsinkomen >= entry.rangeStart && toetsingsinkomen <= entry.rangeEnd) {
-      return isFirstChild ? entry.first : entry.subsequent;
-    }
-  }
-  return 33.0;
-}
-
-function bereken() {
-  const partner = document.getElementById('partner').value === 'ja';
-  const brutoloon1 = parseFloat(document.getElementById('brutoloon1').value) || 0;
-  const brutoloon2 = partner ? parseFloat(document.getElementById('brutoloon2').value) || 0 : 0;
-  const totaalBrutoLoon = brutoloon1 + brutoloon2;
-  const loonbel1 = parseFloat(document.getElementById('loonbel1').value) || 0;
-  const loonbel2 = partner ? parseFloat(document.getElementById('loonbel2').value) || 0 : 0;
-  const totaalLoonbel = loonbel1 + loonbel2;
-  const hypotheekrente = parseFloat(document.getElementById('hypotheekrente').value) || 0;
-  const spaargeld = parseFloat(document.getElementById('spaargeld').value) || 0;
-  const overig = parseFloat(document.getElementById('overigVermogen').value) || 0;
-  const schulden = parseFloat(document.getElementById('schulden').value) || 0;
-  const woz = parseFloat(document.getElementById('woz').value) || 0;
-  const huurt = document.getElementById('huurt').value === 'ja';
-  const huurMaand = huurt ? parseFloat(document.getElementById('huur').value) || 0 : 0;
-  const huurLeeftijd = huurt ? document.getElementById('huurLeeftijd').value : '';
-  const kinderen = parseInt(document.getElementById('kinderen').value) || 0;
-
-  const childLeeftijden = Array.from(document.querySelectorAll('.childLeeftijd')).map(el => parseInt(el.value) || 18);
-  const childOpvangTypes = Array.from(document.querySelectorAll('.childOpvangType')).map(el => el.value);
-  const childUren = Array.from(document.querySelectorAll('.childUren')).map(el => parseFloat(el.value) || 0);
-
-  const aow1 = parseInt(document.getElementById('leeftijdPartner1').value) || 0 >= 67;
-  const aow2 = partner ? parseInt(document.getElementById('leeftijdPartner2').value) || 0 >= 67 : false;
-
-  let html = '<h2>Resultaat schatting 2026</h2>';
-
-  const eigenwoningforfait = berekenEigenwoningforfait(woz);
-  const belastbaarBox1 = totaalBrutoLoon + eigenwoningforfait - hypotheekrente;
-
-  const ibTarief1 = (aow1 || aow2) ? 0.1785 : 0.3575;
-  const ibTarief2 = 0.3756;
-  const ibTarief3 = 0.4950;
-  const schijf1 = 38883;
-  const schijf2 = 78426;
-
-  let ib = 0;
-  if (belastbaarBox1 <= schijf1) ib = belastbaarBox1 * ibTarief1;
-  else if (belastbaarBox1 <= schijf2) ib = schijf1 * ibTarief1 + (belastbaarBox1 - schijf1) * ibTarief2;
-  else ib = schijf1 * ibTarief1 + (schijf2 - schijf1) * ibTarief2 + (belastbaarBox1 - schijf2) * ibTarief3;
-
-  const vrijstellingBox3 = partner ? 2 * 184633 : 184633;
-  const vermogenTotaal = spaargeld + overig;
-  const vermogenNaSchulden = Math.max(0, vermogenTotaal - schulden);
-  let rendementsgrondslag = Math.max(0, vermogenNaSchulden - vrijstellingBox3);
-  let fictRendement = (spaargeld * 0.0128) + (overig * 0.06) - (schulden * 0.027);
-  let box3Inkomen = Math.max(0, fictRendement);
-  let box3Belasting = box3Inkomen * 0.36;
-
-  const verzamelTotaal = belastbaarBox1 + box3Inkomen;
-
-  const share = partner ? 0.5 : 1;
-  const verzamel1 = brutoloon1 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share;
-  const verzamel2 = partner ? brutoloon2 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share : 0;
-
-  const ahk1 = berekenAHK(verzamel1);
-  const ahk2 = partner ? berekenAHK(verzamel2) : 0;
-  const totalAHK = ahk1 + ahk2;
-
-  const ak1 = berekenAK(brutoloon1);
-  const ak2 = partner ? berekenAK(brutoloon2) : 0;
-  const totalAK = ak1 + ak2;
-
-  let iack = 0;
-  if (childLeeftijden.some(age => age < 12)) {
-    const lowestArbeids = Math.min(brutoloon1, brutoloon2 || Infinity);
-    iack = berekenIACK(lowestArbeids);
-  }
-
-  const totalKortingen = totalAHK + totalAK + iack;
-
-  const teBetalenBox1 = Math.max(0, ib - totalKortingen - totaalLoonbel);
-
-  const toetsingsinkomenKinderopvang = belastbaarBox1;
-
-  // Kindgebonden budget 2026
-  const kgbVrijstelling = partner ? 2 * 184633 : 184633;
-  let kindgebondenBudget = 0;
-  if (kinderen > 0 && vermogenNaSchulden <= kgbVrijstelling) {
-    const maxPerKind = 2580;
-    let maxTotaal = aantalKinderen * maxPerKind;
-    const drempelKGB = 39141;
-    let verminderingKGB = 0;
-    if (toetsingsinkomenKinderopvang > drempelKGB) {
-      verminderingKGB = 0.076 * (toetsingsinkomenKinderopvang - drempelKGB);
-    }
-    kindgebondenBudget = Math.max(0, maxTotaal - verminderingKGB);
-  }
-  html += `<p><b>Kindgebonden budget schatting (jaar):</b> €${Math.round(kindgebondenBudget).toLocaleString('nl-NL')} (vermogen na schulden: €${Math.round(vermogenNaSchulden).toLocaleString('nl-NL')}, vrijstelling: €${Math.round(kgbVrijstelling).toLocaleString('nl-NL')})</p>`;
-
-  // Zorg, huur, kinderopvang (blijft hetzelfde als eerder)
-
-  let zorg = 0;
-  let zorgMaxMaand = partner ? 246 : 129;
-  let zorgGrens = partner ? 51142 : 40857;
-  if (verzamelTotaal < 29500) zorg = zorgMaxMaand * 12;
-  else if (verzamelTotaal < zorgGrens) {
-    let afbouw = (verzamelTotaal - 29500) / (zorgGrens - 29500);
-    zorg = zorgMaxMaand * 12 * (1 - afbouw * 0.8);
-  }
-  html += `<p><b>Zorgtoeslag schatting (jaar):</b> €${Math.round(zorg).toLocaleString('nl-NL')}</p>`;
-
-  let huurtoeslag = 0;
-  if (huurt) {
-    let maxHuur = (huurLeeftijd === 'onder21') ? 498.20 : 932.93;
-    let rekenHuur = Math.min(huurMaand, maxHuur);
-    let huurtoeslagMaand = 0;
-    if (rekenHuur > 200 && verzamelTotaal < (partner ? 60000 : 45000) + kinderen*5000) {
-      huurtoeslagMaand = Math.max(0, (rekenHuur * 12 - 3000) * 0.4 - verzamelTotaal * 0.15) / 12;
-    }
-    huurtoeslag = huurtoeslagMaand * 12;
-    html += `<p><b>Huurtoeslag schatting (jaar):</b> €${Math.round(huurtoeslag).toLocaleString('nl-NL')}</p>`;
-  }
-
-  // Kinderopvang (blijft hetzelfde, met gesorteerde uren voor first/subsequent)
-
-  let opvangToeslag = 0;
-  let opvangDetails = '<h3>Kinderopvangtoeslag details:</h3>';
-  if (kinderen > 0) {
-    let childData = [];
-    for (let i = 0; i < kinderen; i++) {
-      childData.push({
-        index: i + 1,
-        urenMaand: childUren[i],
-        type: childOpvangTypes[i],
-        leeftijd: childLeeftijden[i]
-      });
-    }
-    childData.sort((a, b) => b.urenMaand - a.urenMaand);
-
-    for (let i = 0; i < childData.length; i++) {
-      const item = childData[i];
-      const urenMaand = item.urenMaand;
-      const type = item.type;
-      const maxPrijsUur = maxHourlyRates[type];
-      const kostenJaar = maxPrijsUur * urenMaand * 12;
-      const isFirstChild = i === 0;
-      const perc = findPercentage(toetsingsinkomenKinderopvang, isFirstChild) / 100;
-      const toeslagChild = perc * kostenJaar;
-      opvangToeslag += toeslagChild;
-      opvangDetails += `<p>Kind ${item.index} (${type}, ${urenMaand} uur/maand): Max kosten €${kostenJaar.toLocaleString('nl-NL')} (perc ${perc * 100}%), toeslag €${Math.round(toeslagChild).toLocaleString('nl-NL')}</p>`;
-    }
-  } else {
-    opvangDetails += '<p>Geen kinderen of geen opvang opgegeven.</p>';
-  }
-  html += opvangDetails;
-  html += `<p><b>Kinderopvangtoeslag schatting (jaar, totaal):</b> €${Math.round(opvangToeslag).toLocaleString('nl-NL')}</p>`;
-
-  let totaalToeslagen = zorg + huurtoeslag + opvangToeslag + kindgebondenBudget;
-  let nettoBelasting = teBetalenBox1 + box3Belasting - totaalToeslagen;
-
-  html += `<hr><h3>Totaaloverzicht</h3>
-  <table>
-    <tr><th>Omschrijving</th><th>Bedrag (€/jaar)</th></tr>
-    <tr><td>Toeslagen totaal (incl. kindgebonden budget)</td><td>+${Math.round(totaalToeslagen).toLocaleString('nl-NL')}</td></tr>
-    <tr><td>Belasting box 1 + 3 schatting</td><td>-${Math.round(teBetalenBox1 + box3Belasting).toLocaleString('nl-NL')}</td></tr>
-    <tr><td><b>Netto schatting (belasting min toeslagen)</b></td><td><b>${Math.round(nettoBelasting).toLocaleString('nl-NL')}</b></td></tr>
-  </table>`;
-
-  document.getElementById('result').innerHTML = html;
-}
-
-// Initieel laden
-window.onload = function() {
-  togglePartnerFields();
-  generateChildFields();
-  toggleHuurSection();
-};
+ReactDOM.render(<BelastingCalculator />, document.getElementById('root'));
 </script>
 </body>
 </html>
+```
