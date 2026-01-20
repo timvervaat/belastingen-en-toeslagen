@@ -175,26 +175,113 @@
       };
 
       const berekenKinderopvangtoeslag = (toetsInkomen, opvangDetails) => {
-        let percEerste = 0.96; // max percentage eerste kind
-        if (toetsInkomen > 56413) {
-          percEerste = Math.max(0.33, 0.96 - (toetsInkomen - 56413) / 10000 * 0.1); // vereenvoudigde afbouw
-        }
-        const percVolgend = percEerste; // vereenvoudigd, eigenlijk lagere percentages voor volgende kinderen
-        let totaal = 0;
-        // Sorteer op uren om hoogste uren eerste kind toe te wijzen
-        const gesorteerd = [...opvangDetails].sort((a, b) => b.uren - a.uren);
-        gesorteerd.forEach((opv, index) => {
-          const urenMaand = Math.min(opv.uren || 0, 230);
-          const urenJaar = urenMaand * 12;
-          let maxPrijs = 0;
-          if (opv.type === 'dagopvang') maxPrijs = 9.12; // 2026 waarden approx
-          if (opv.type === 'bso') maxPrijs = 8.17;
-          if (opv.type === 'gastouder') maxPrijs = 7.24;
-          const perc = index === 0 ? percEerste : percVolgend;
-          totaal += urenJaar * maxPrijs * perc;
-        });
-        return totaal;
-      };
+  if (!opvangDetails || opvangDetails.length === 0) return 0;
+
+  // Officiële schijven 2026 (array van {van, tot, percEerste, percVolgend})
+  const schijven = [
+    { van: 0, tot: 24149, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 24150, tot: 25756, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 25757, tot: 27363, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 27364, tot: 28973, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 28974, tot: 30579, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 30580, tot: 32189, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 32190, tot: 33795, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 33796, tot: 35400, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 35401, tot: 37129, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 37130, tot: 38855, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 38856, tot: 40586, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 40587, tot: 42313, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 42314, tot: 44046, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 44047, tot: 45776, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 45777, tot: 47546, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 47547, tot: 49318, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 49319, tot: 51092, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 51093, tot: 52864, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 52865, tot: 54641, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 54642, tot: 56412, percEerste: 0.960, percVolgend: 0.960 },
+    { van: 56413, tot: 58184, percEerste: 0.955, percVolgend: 0.956 },
+    { van: 58185, tot: 59957, percEerste: 0.948, percVolgend: 0.956 },
+    { van: 59958, tot: 61895, percEerste: 0.939, percVolgend: 0.956 },
+    { van: 61896, tot: 65695, percEerste: 0.924, percVolgend: 0.956 },
+    { van: 65696, tot: 69492, percEerste: 0.916, percVolgend: 0.952 },
+    { van: 69493, tot: 73292, percEerste: 0.905, percVolgend: 0.946 },
+    { van: 73293, tot: 77094, percEerste: 0.882, percVolgend: 0.942 },
+    { van: 77095, tot: 80891, percEerste: 0.859, percVolgend: 0.939 },
+    { van: 80892, tot: 84693, percEerste: 0.837, percVolgend: 0.932 },
+    { van: 84694, tot: 88491, percEerste: 0.812, percVolgend: 0.927 },
+    { van: 88492, tot: 92291, percEerste: 0.789, percVolgend: 0.922 },
+    { van: 92292, tot: 96091, percEerste: 0.767, percVolgend: 0.915 },
+    { van: 96092, tot: 99889, percEerste: 0.743, percVolgend: 0.909 },
+    { van: 99890, tot: 103694, percEerste: 0.721, percVolgend: 0.905 },
+    { van: 103695, tot: 107492, percEerste: 0.696, percVolgend: 0.902 },
+    { van: 107493, tot: 111290, percEerste: 0.673, percVolgend: 0.895 },
+    { van: 111291, tot: 115090, percEerste: 0.651, percVolgend: 0.891 },
+    { van: 115091, tot: 118963, percEerste: 0.627, percVolgend: 0.886 },
+    { van: 118964, tot: 122857, percEerste: 0.606, percVolgend: 0.879 },
+    { van: 122858, tot: 126747, percEerste: 0.585, percVolgend: 0.874 },
+    { van: 126748, tot: 130638, percEerste: 0.564, percVolgend: 0.870 },
+    { van: 130639, tot: 134527, percEerste: 0.542, percVolgend: 0.867 },
+    { van: 134528, tot: 138420, percEerste: 0.523, percVolgend: 0.860 },
+    { van: 138421, tot: 142312, percEerste: 0.504, percVolgend: 0.854 },
+    { van: 142313, tot: 146205, percEerste: 0.485, percVolgend: 0.850 },
+    { van: 146206, tot: 150092, percEerste: 0.465, percVolgend: 0.844 },
+    { van: 150093, tot: 153982, percEerste: 0.445, percVolgend: 0.840 },
+    { van: 153983, tot: 157877, percEerste: 0.425, percVolgend: 0.833 },
+    { van: 157878, tot: 161766, percEerste: 0.405, percVolgend: 0.827 },
+    { van: 161767, tot: 165657, percEerste: 0.385, percVolgend: 0.817 },
+    { van: 165658, tot: 169547, percEerste: 0.365, percVolgend: 0.814 },
+    { van: 169548, tot: 173440, percEerste: 0.365, percVolgend: 0.806 },
+    { van: 173441, tot: 177335, percEerste: 0.365, percVolgend: 0.797 },
+    { van: 177336, tot: 181223, percEerste: 0.365, percVolgend: 0.791 },
+    { van: 181224, tot: 185114, percEerste: 0.365, percVolgend: 0.782 },
+    { van: 185115, tot: 189002, percEerste: 0.365, percVolgend: 0.777 },
+    { van: 189003, tot: 192896, percEerste: 0.365, percVolgend: 0.769 },
+    { van: 192897, tot: 196789, percEerste: 0.365, percVolgend: 0.762 },
+    { van: 196790, tot: 200681, percEerste: 0.365, percVolgend: 0.755 },
+    { van: 200682, tot: 204571, percEerste: 0.365, percVolgend: 0.745 },
+    { van: 204572, tot: 208458, percEerste: 0.365, percVolgend: 0.740 },
+    { van: 208459, tot: 212353, percEerste: 0.365, percVolgend: 0.733 },
+    { van: 212354, tot: 216242, percEerste: 0.365, percVolgend: 0.725 },
+    { van: 216243, tot: 220134, percEerste: 0.365, percVolgend: 0.718 },
+    { van: 220135, tot: 224026, percEerste: 0.365, percVolgend: 0.712 },
+    { van: 224027, tot: 227915, percEerste: 0.365, percVolgend: 0.704 },
+    { van: 227916, tot: 231807, percEerste: 0.365, percVolgend: 0.696 },
+    { van: 231808, tot: 235697, percEerste: 0.365, percVolgend: 0.691 },
+    { van: 235698, tot: Infinity, percEerste: 0.365, percVolgend: 0.682 }  // en hoger
+  ];
+
+  // Zoek juiste schijf
+  let percEerste = 0.365;  // fallback minimum
+  let percVolgend = 0.682;
+  for (const schijf of schijven) {
+    if (toetsInkomen >= schijf.van && toetsInkomen <= schijf.tot) {
+      percEerste = schijf.percEerste;
+      percVolgend = schijf.percVolgend;
+      break;
+    }
+  }
+
+  let totaal = 0;
+
+  // Sorteer opvang op aantal uren (hoogste uren = 'eerste kind' percentage)
+  const gesorteerd = [...opvangDetails].sort((a, b) => (b.uren || 0) - (a.uren || 0));
+
+  gesorteerd.forEach((opv, index) => {
+    const urenMaand = Math.min(opv.uren || 0, 230);
+    const urenJaar = urenMaand * 12;
+
+    let maxPrijs = 0;
+    if (opv.type === 'dagopvang') maxPrijs = 11.23;
+    if (opv.type === 'bso') maxPrijs = 9.98;
+    if (opv.type === 'gastouder') maxPrijs = 8.49;
+
+    const perc = (index === 0) ? percEerste : percVolgend;
+
+    totaal += urenJaar * maxPrijs * perc;
+  });
+
+  return Math.round(totaal);  // Afronden op hele euro's (gebruikelijk bij toeslagen)
+};
 
       const berekenKinderbijslag = (leeftijden) => {
         let totaalJaar = 0;
