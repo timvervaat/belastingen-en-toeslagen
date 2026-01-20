@@ -18,13 +18,13 @@
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #e9ecef; }
     .hidden { display: none; }
-    .child-group { margin-top: 20px; border: 1px solid #eee; padding: 10px; border-radius: 4px; background: #f9f9f9; }
+    .child-group { margin-top: 20px; border: 1px solid #eee; padding: 15px; border-radius: 6px; background: #f9f9f9; }
   </style>
 </head>
 <body>
 
 <h1>Schatting Belastingen & Toeslagen 2026</h1>
-<p>Vul je gegevens in voor een schatting van box 1/3 belasting, heffingskortingen en toeslagen. Gebaseerd op officiële 2026-tabellen.</p>
+<p>Vul je gegevens in voor een schatting van box 1/3 belasting (incl. AHK, AK, IACK), heffingskortingen en toeslagen. Gebaseerd op officiële 2026-tabellen.</p>
 
 <div class="section">
   <h2>Persoonlijke situatie</h2>
@@ -103,17 +103,22 @@
   <input type="number" id="schulden" min="0" value="0">
 </div>
 
+<div class="section">
+  <h2>Kinderopvang</h2>
+  <p>Voer per kind de soort opvang en geschatte uren per maand in.</p>
+</div>
+
 <button onclick="bereken()">Bereken schatting 2026</button>
 
 <div id="result"></div>
 
 <div class="disclaimer">
   <strong>Disclaimer – Dit is GEEN officiële berekening!</strong><br>
-  Alleen een schatting op basis van bekende 2026-regels (jan 2026). Geen rekening met alle aftrekken, eigenwoningforfait exact, alleenstaande-ouderkorting, etc. Gebruik altijd de officiële proefberekening op <a href="https://www.belastingdienst.nl/rekenhulpen" target="_blank">belastingdienst.nl</a> of <a href="https://www.toeslagen.nl/proefberekening" target="_blank">toeslagen.nl</a>. Resultaten kunnen sterk afwijken.
+  Alleen een schatting op basis van bekende 2026-regels (jan 2026). Geen rekening met alle aftrekken, alleenstaande-ouderkorting, etc. Gebruik altijd de officiële proefberekening op <a href="https://www.belastingdienst.nl/rekenhulpen" target="_blank">belastingdienst.nl</a> of <a href="https://www.toeslagen.nl/proefberekening" target="_blank">toeslagen.nl</a>.
 </div>
 
 <script>
-// Functies voor partner en kinderen (zoals eerder)
+// Functies voor dynamische velden
 function togglePartnerFields() {
   const partner = document.getElementById('partner').value === 'ja';
   document.getElementById('partnerAges').classList.toggle('hidden', !partner);
@@ -132,12 +137,14 @@ function generateChildFields() {
       <h3>Kind ${i}</h3>
       <label>Leeftijd kind ${i} (in 2026)</label>
       <input type="number" class="childLeeftijd" min="0" max="17" value="10">
+
       <label>Soort opvang</label>
       <select class="childOpvangType">
         <option value="dagopvang">Dagopvang (€11,23/uur)</option>
         <option value="bso">Buitenschoolse opvang (€9,98/uur)</option>
         <option value="gastouder">Gastouderopvang (€8,49/uur)</option>
       </select>
+
       <label>Aantal uren opvang per maand (gemiddeld)</label>
       <input type="number" class="childUren" min="0" value="0">
     `;
@@ -150,7 +157,7 @@ function toggleHuurSection() {
   document.getElementById('huurSection').classList.toggle('hidden', huurt !== 'ja');
 }
 
-// Eigenwoningforfait (staffels 2026)
+// Eigenwoningforfait 2026
 function berekenEigenwoningforfait(woz) {
   if (woz <= 12500) return 0;
   if (woz <= 25000) return woz * 0.0010;
@@ -160,14 +167,14 @@ function berekenEigenwoningforfait(woz) {
   return 4725 + (woz - 1350000) * 0.0235;
 }
 
-// AHK (algemene heffingskorting)
+// AHK 2026 (algemene heffingskorting)
 function berekenAHK(verzamel) {
   if (verzamel <= 28406) return 3068;
   if (verzamel >= 76817) return 0;
   return 3068 - 0.06337 * (verzamel - 28406);
 }
 
-// AK (arbeidskorting)
+// AK 2026 (arbeidskorting)
 function berekenAK(arbeids) {
   if (arbeids <= 12169) return 0.08053 * arbeids;
   if (arbeids <= 26288) return 980 + 0.3003 * (arbeids - 12169);
@@ -176,14 +183,14 @@ function berekenAK(arbeids) {
   return 0;
 }
 
-// IACK
+// IACK 2026
 function berekenIACK(arbeids) {
   if (arbeids <= 6145) return 0;
   if (arbeids >= 32223) return 2986;
   return 0.1145 * (arbeids - 6145);
 }
 
-// Kinderopvang percentages tabel 2026 (gezamenlijk toetsingsinkomen)
+// Kinderopvang percentages 2026 (gezamenlijk toetsingsinkomen)
 const percentagesTable = [
   { rangeStart: 0, rangeEnd: 24149, first: 96.0, subsequent: 96.0 },
   { rangeStart: 24150, rangeEnd: 25756, first: 96.0, subsequent: 96.0 },
@@ -256,7 +263,7 @@ const percentagesTable = [
   { rangeStart: 235698, rangeEnd: Infinity, first: 36.5, subsequent: 68.2 }
 ];
 
-const maxHourlyRates2026 = {
+const maxHourlyRates = {
   dagopvang: 11.23,
   bso: 9.98,
   gastouder: 8.49
@@ -268,7 +275,7 @@ function findPercentage(toetsingsinkomen, isFirstChild) {
       return isFirstChild ? entry.first : entry.subsequent;
     }
   }
-  return 33.0; // minimum percentage als buiten tabel
+  return 33.0; // minimum
 }
 
 function bereken() {
@@ -326,7 +333,7 @@ function bereken() {
   // Verzamelinkomen voor kortingen
   const verzamelTotaal = belastbaarBox1 + box3Inkomen;
 
-  // Kortingen (AHK, AK, IACK)
+  // Kortingen
   const share = partner ? 0.5 : 1;
   const verzamel1 = brutoloon1 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share;
   const verzamel2 = partner ? brutoloon2 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share : 0;
@@ -347,7 +354,6 @@ function bereken() {
 
   const totalKortingen = totalAHK + totalAK + iack;
 
-  // Te betalen box 1
   const teBetalenBox1 = Math.max(0, ib - totalKortingen - totaalLoonbel);
 
   // Toetsingsinkomen kinderopvang = belastbaar box 1 (gezamenlijk)
@@ -361,7 +367,7 @@ function bereken() {
 
   html += `<p><b>Box 3 vermogensrendementsheffing:</b> €${Math.round(box3Belasting).toLocaleString('nl-NL')}</p>`;
 
-  // Zorgtoeslag (ruw)
+  // Zorgtoeslag
   let zorg = 0;
   let zorgMaxMaand = partner ? 246 : 129;
   let zorgGrens = partner ? 51142 : 40857;
@@ -372,7 +378,7 @@ function bereken() {
   }
   html += `<p><b>Zorgtoeslag schatting (jaar):</b> €${Math.round(zorg).toLocaleString('nl-NL')}</p>`;
 
-  // Huurtoeslag (ruw)
+  // Huurtoeslag
   let huurtoeslag = 0;
   if (huurt) {
     let maxHuur = (huurLeeftijd === 'onder21') ? 498.20 : 932.93;
@@ -385,14 +391,14 @@ function bereken() {
     html += `<p><b>Huurtoeslag schatting (jaar):</b> €${Math.round(huurtoeslag).toLocaleString('nl-NL')}</p>`;
   }
 
-  // Kinderopvangtoeslag (2026 tabel)
+  // Kinderopvangtoeslag 2026
   let opvangToeslag = 0;
   let opvangDetails = '<h3>Kinderopvangtoeslag details:</h3>';
   if (kinderen > 0) {
     for (let i = 0; i < kinderen; i++) {
       const urenMaand = childUren[i];
       const type = childOpvangTypes[i];
-      const maxPrijsUur = maxHourlyRates2026[type];
+      const maxPrijsUur = maxHourlyRates[type];
       const kostenJaar = maxPrijsUur * urenMaand * 12;
       const isFirstChild = i === 0;
       const perc = findPercentage(toetsingsinkomenKinderopvang, isFirstChild) / 100;
@@ -404,4 +410,29 @@ function bereken() {
     opvangDetails += '<p>Geen kinderen of geen opvang opgegeven.</p>';
   }
   html += opvangDetails;
-  html += `<p><b>Kinderopvangtoeslag schatting (
+  html += `<p><b>Kinderopvangtoeslag schatting (jaar, totaal):</b> €${Math.round(opvangToeslag).toLocaleString('nl-NL')}</p>`;
+
+  // Totaal
+  let totaalToeslagen = zorg + huurtoeslag + opvangToeslag;
+  let nettoBelasting = teBetalenBox1 + box3Belasting - totaalToeslagen;
+
+  html += `<hr><h3>Totaaloverzicht</h3>
+  <table>
+    <tr><th>Omschrijving</th><th>Bedrag (€/jaar)</th></tr>
+    <tr><td>Toeslagen totaal</td><td>+${Math.round(totaalToeslagen).toLocaleString('nl-NL')}</td></tr>
+    <tr><td>Belasting box 1 + 3 schatting</td><td>-${Math.round(teBetalenBox1 + box3Belasting).toLocaleString('nl-NL')}</td></tr>
+    <tr><td><b>Netto schatting (belasting min toeslagen)</b></td><td><b>${Math.round(nettoBelasting).toLocaleString('nl-NL')}</b></td></tr>
+  </table>`;
+
+  document.getElementById('result').innerHTML = html;
+}
+
+// Initieel laden
+window.onload = function() {
+  togglePartnerFields();
+  generateChildFields();
+  toggleHuurSection();
+};
+</script>
+</body>
+</html>
