@@ -1,4 +1,4 @@
-# Belasting & Toeslagen Calculator 2026
+# Belastingen en toeslagen calculator 2026
 
 Een web applicatie voor het berekenen van Nederlandse belastingen en toeslagen over 2026.
 
