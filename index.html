@@ -98,21 +98,46 @@
       };
 
       const berekenBox3 = (bank1, beleg1, schuld1, bank2 = 0, beleg2 = 0, schuld2 = 0) => {
-        const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
-        const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
-        const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
-        const heffingsVrijVermogen = fiscaalPartner ? 118714 : 59357;
-        const schuldDrempel = fiscaalPartner ? 7600 : 3800;
-        const totaalBezittingen = bank + beleg;
-        const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrijVermogen - Math.max(0, schuld - schuldDrempel));
-        const rendementBank = bank * 0.0128;
-        const rendementBeleggingen = beleg * 0.06;
-        const rendementSchulden = Math.max(0, schuld - schuldDrempel) * 0.027;
-        const belastbaarRendement = Math.max(0, rendementBank + rendementBeleggingen - rendementSchulden);
-        const box3Belasting = belastbaarRendement * 0.36;
-        return { belastbaarVermogen, belastbaarRendement, box3Belasting };
-      };
+  const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
+  const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
+  const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
 
+  const heffingsVrij = fiscaalPartner ? 118714 : 59357;     // 2026-bedragen
+  const schuldDrempel = fiscaalPartner ? 7600 : 3800;
+
+  const totaalBezittingen = bank + beleg;
+  const nettoSchuldCorrectie = Math.max(0, schuld - schuldDrempel);
+
+  const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrij - nettoSchuldCorrectie);
+
+  let belastbaarRendement = 0;
+
+  if (belastbaarVermogen > 0) {
+    // Verdeling van het belastbare vermogen over de categorieën (pro rata)
+    const totaalBruto = bank + beleg + nettoSchuldCorrectie; // schuld telt negatief mee in rendement
+
+    if (totaalBruto > 0) {
+      const fractieBank = bank / totaalBruto;
+      const fractieBeleg = beleg / totaalBruto;
+      // fractieSchuld = nettoSchuldCorrectie / totaalBruto; (negatief effect)
+
+      const rendBankDeel     = belastbaarVermogen * fractieBank * 0.0128;
+      const rendBelegDeel    = belastbaarVermogen * fractieBeleg * 0.06;
+      const rendSchuldDeel   = nettoSchuldCorrectie * 0.027; // schuld blijft apart
+
+      belastbaarRendement = rendBankDeel + rendBelegDeel - rendSchuldDeel;
+      belastbaarRendement = Math.max(0, belastbaarRendement);
+    }
+  }
+
+  const box3Belasting = belastbaarRendement * 0.36;
+
+  return {
+    belastbaarVermogen,
+    belastbaarRendement,
+    box3Belasting
+  };
+};
       const berekenHeffingskortingen = (verzamelinkomen, arbeidsinkomen) => {
         let ahk = 3115;
         if (verzamelinkomen > 29736) {
