@@ -242,7 +242,7 @@ function toggleHuurSection() {
   document.getElementById('huurSection').classList.toggle('hidden', huurt !== 'ja');
 }
 
-// Eigenwoningforfait
+// Eigenwoningforfait 2026
 function berekenEigenwoningforfait(woz) {
   if (woz <= 12500) return 0;
   if (woz <= 25000) return woz * 0.0010;
@@ -252,14 +252,14 @@ function berekenEigenwoningforfait(woz) {
   return 4725 + (woz - 1350000) * 0.0235;
 }
 
-// AHK
+// AHK 2026
 function berekenAHK(verzamel) {
   if (verzamel <= 28406) return 3068;
   if (verzamel >= 76817) return 0;
   return 3068 - 0.06337 * (verzamel - 28406);
 }
 
-// AK
+// AK 2026
 function berekenAK(arbeids) {
   if (arbeids <= 12169) return 0.08053 * arbeids;
   if (arbeids <= 26288) return 980 + 0.3003 * (arbeids - 12169);
@@ -268,11 +268,30 @@ function berekenAK(arbeids) {
   return 0;
 }
 
-// IACK
+// IACK 2026
 function berekenIACK(arbeids) {
   if (arbeids <= 6145) return 0;
   if (arbeids >= 32223) return 2986;
   return 0.1145 * (arbeids - 6145);
+}
+
+// Kindgebonden budget 2026
+function berekenKindgebondenBudget(aantalKinderen, toetsingsinkomen, vermogenNaSchulden, partner) {
+  if (aantalKinderen === 0) return 0;
+
+  const vrijstellingBox3 = partner ? 2 * 184633 : 184633;
+  if (vermogenNaSchulden > vrijstellingBox3) return 0;
+
+  const maxPerKind = 2580;
+  let maxTotaal = aantalKinderen * maxPerKind;
+
+  const drempel = 39141;
+  let vermindering = 0;
+  if (toetsingsinkomen > drempel) {
+    vermindering = 0.076 * (toetsingsinkomen - drempel);
+  }
+
+  return Math.max(0, maxTotaal - vermindering);
 }
 
 // Kinderopvang percentages 2026
@@ -404,8 +423,10 @@ function bereken() {
   else if (belastbaarBox1 <= schijf2) ib = schijf1 * ibTarief1 + (belastbaarBox1 - schijf1) * ibTarief2;
   else ib = schijf1 * ibTarief1 + (schijf2 - schijf1) * ibTarief2 + (belastbaarBox1 - schijf2) * ibTarief3;
 
-  const vrijstelling = partner ? 2 * 59357 : 59357;
-  let rendementsgrondslag = Math.max(0, spaargeld + overig - schulden - vrijstelling);
+  const vrijstellingBox3 = partner ? 2 * 184633 : 184633;
+  const vermogenTotaal = spaargeld + overig;
+  const vermogenNaSchulden = Math.max(0, vermogenTotaal - schulden);
+  let rendementsgrondslag = Math.max(0, vermogenNaSchulden - vrijstellingBox3);
   let fictRendement = (spaargeld * 0.0128) + (overig * 0.06) - (schulden * 0.027);
   let box3Inkomen = Math.max(0, fictRendement);
   let box3Belasting = box3Inkomen * 0.36;
@@ -436,13 +457,22 @@ function bereken() {
 
   const toetsingsinkomenKinderopvang = belastbaarBox1;
 
-  html += `<p><b>Box 1 bruto belasting (incl. eigenwoningforfait €${Math.round(eigenwoningforfait).toLocaleString('nl-NL')}):</b> €${Math.round(ib).toLocaleString('nl-NL')}</p>`;
-  html += `<p><b>Algemene heffingskorting (totaal):</b> €${Math.round(totalAHK).toLocaleString('nl-NL')}</p>`;
-  html += `<p><b>Arbeidskorting (totaal):</b> €${Math.round(totalAK).toLocaleString('nl-NL')}</p>`;
-  html += `<p><b>Inkomensafhankelijke combinatiekorting (IACK):</b> €${Math.round(iack).toLocaleString('nl-NL')}</p>`;
-  html += `<p><b>Box 1 na kortingen en voorheffingen:</b> €${Math.round(teBetalenBox1).toLocaleString('nl-NL')}</p>`;
+  // Kindgebonden budget 2026
+  const kgbVrijstelling = partner ? 2 * 184633 : 184633;
+  let kindgebondenBudget = 0;
+  if (kinderen > 0 && vermogenNaSchulden <= kgbVrijstelling) {
+    const maxPerKind = 2580;
+    let maxTotaal = aantalKinderen * maxPerKind;
+    const drempelKGB = 39141;
+    let verminderingKGB = 0;
+    if (toetsingsinkomenKinderopvang > drempelKGB) {
+      verminderingKGB = 0.076 * (toetsingsinkomenKinderopvang - drempelKGB);
+    }
+    kindgebondenBudget = Math.max(0, maxTotaal - verminderingKGB);
+  }
+  html += `<p><b>Kindgebonden budget schatting (jaar):</b> €${Math.round(kindgebondenBudget).toLocaleString('nl-NL')} (vermogen na schulden: €${Math.round(vermogenNaSchulden).toLocaleString('nl-NL')}, vrijstelling: €${Math.round(kgbVrijstelling).toLocaleString('nl-NL')})</p>`;
 
-  html += `<p><b>Box 3 vermogensrendementsheffing:</b> €${Math.round(box3Belasting).toLocaleString('nl-NL')}</p>`;
+  // Zorg, huur, kinderopvang (blijft hetzelfde als eerder)
 
   let zorg = 0;
   let zorgMaxMaand = partner ? 246 : 129;
@@ -466,19 +496,20 @@ function bereken() {
     html += `<p><b>Huurtoeslag schatting (jaar):</b> €${Math.round(huurtoeslag).toLocaleString('nl-NL')}</p>`;
   }
 
-  // Kinderopvangtoeslag - gesorteerd op uren
+  // Kinderopvang (blijft hetzelfde, met gesorteerde uren voor first/subsequent)
+
   let opvangToeslag = 0;
   let opvangDetails = '<h3>Kinderopvangtoeslag details:</h3>';
   if (kinderen > 0) {
     let childData = [];
     for (let i = 0; i < kinderen; i++) {
       childData.push({
+        index: i + 1,
         urenMaand: childUren[i],
         type: childOpvangTypes[i],
         leeftijd: childLeeftijden[i]
       });
     }
-    // Sorteer aflopend op urenMaand
     childData.sort((a, b) => b.urenMaand - a.urenMaand);
 
     for (let i = 0; i < childData.length; i++) {
@@ -487,11 +518,11 @@ function bereken() {
       const type = item.type;
       const maxPrijsUur = maxHourlyRates[type];
       const kostenJaar = maxPrijsUur * urenMaand * 12;
-      const isFirstChild = i === 0; // Meeste uren = first
+      const isFirstChild = i === 0;
       const perc = findPercentage(toetsingsinkomenKinderopvang, isFirstChild) / 100;
       const toeslagChild = perc * kostenJaar;
       opvangToeslag += toeslagChild;
-      opvangDetails += `<p>Kind ${i+1} (${type}, ${urenMaand} uur/maand): Max kosten €${kostenJaar.toLocaleString('nl-NL')} (perc ${perc * 100}%), toeslag €${Math.round(toeslagChild).toLocaleString('nl-NL')}</p>`;
+      opvangDetails += `<p>Kind ${item.index} (${type}, ${urenMaand} uur/maand): Max kosten €${kostenJaar.toLocaleString('nl-NL')} (perc ${perc * 100}%), toeslag €${Math.round(toeslagChild).toLocaleString('nl-NL')}</p>`;
     }
   } else {
     opvangDetails += '<p>Geen kinderen of geen opvang opgegeven.</p>';
@@ -499,13 +530,13 @@ function bereken() {
   html += opvangDetails;
   html += `<p><b>Kinderopvangtoeslag schatting (jaar, totaal):</b> €${Math.round(opvangToeslag).toLocaleString('nl-NL')}</p>`;
 
-  let totaalToeslagen = zorg + huurtoeslag + opvangToeslag;
+  let totaalToeslagen = zorg + huurtoeslag + opvangToeslag + kindgebondenBudget;
   let nettoBelasting = teBetalenBox1 + box3Belasting - totaalToeslagen;
 
   html += `<hr><h3>Totaaloverzicht</h3>
   <table>
     <tr><th>Omschrijving</th><th>Bedrag (€/jaar)</th></tr>
-    <tr><td>Toeslagen totaal</td><td>+${Math.round(totaalToeslagen).toLocaleString('nl-NL')}</td></tr>
+    <tr><td>Toeslagen totaal (incl. kindgebonden budget)</td><td>+${Math.round(totaalToeslagen).toLocaleString('nl-NL')}</td></tr>
     <tr><td>Belasting box 1 + 3 schatting</td><td>-${Math.round(teBetalenBox1 + box3Belasting).toLocaleString('nl-NL')}</td></tr>
     <tr><td><b>Netto schatting (belasting min toeslagen)</b></td><td><b>${Math.round(nettoBelasting).toLocaleString('nl-NL')}</b></td></tr>
   </table>`;
