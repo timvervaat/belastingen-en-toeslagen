@@ -242,7 +242,7 @@ function toggleHuurSection() {
   document.getElementById('huurSection').classList.toggle('hidden', huurt !== 'ja');
 }
 
-// Eigenwoningforfait 2026
+// Eigenwoningforfait
 function berekenEigenwoningforfait(woz) {
   if (woz <= 12500) return 0;
   if (woz <= 25000) return woz * 0.0010;
@@ -252,14 +252,14 @@ function berekenEigenwoningforfait(woz) {
   return 4725 + (woz - 1350000) * 0.0235;
 }
 
-// AHK 2026
+// AHK
 function berekenAHK(verzamel) {
   if (verzamel <= 28406) return 3068;
   if (verzamel >= 76817) return 0;
   return 3068 - 0.06337 * (verzamel - 28406);
 }
 
-// AK 2026
+// AK
 function berekenAK(arbeids) {
   if (arbeids <= 12169) return 0.08053 * arbeids;
   if (arbeids <= 26288) return 980 + 0.3003 * (arbeids - 12169);
@@ -268,7 +268,7 @@ function berekenAK(arbeids) {
   return 0;
 }
 
-// IACK 2026
+// IACK
 function berekenIACK(arbeids) {
   if (arbeids <= 6145) return 0;
   if (arbeids >= 32223) return 2986;
@@ -466,15 +466,28 @@ function bereken() {
     html += `<p><b>Huurtoeslag schatting (jaar):</b> €${Math.round(huurtoeslag).toLocaleString('nl-NL')}</p>`;
   }
 
+  // Kinderopvangtoeslag - gesorteerd op uren
   let opvangToeslag = 0;
   let opvangDetails = '<h3>Kinderopvangtoeslag details:</h3>';
   if (kinderen > 0) {
+    let childData = [];
     for (let i = 0; i < kinderen; i++) {
-      const urenMaand = childUren[i];
-      const type = childOpvangTypes[i];
+      childData.push({
+        urenMaand: childUren[i],
+        type: childOpvangTypes[i],
+        leeftijd: childLeeftijden[i]
+      });
+    }
+    // Sorteer aflopend op urenMaand
+    childData.sort((a, b) => b.urenMaand - a.urenMaand);
+
+    for (let i = 0; i < childData.length; i++) {
+      const item = childData[i];
+      const urenMaand = item.urenMaand;
+      const type = item.type;
       const maxPrijsUur = maxHourlyRates[type];
       const kostenJaar = maxPrijsUur * urenMaand * 12;
-      const isFirstChild = i === 0;
+      const isFirstChild = i === 0; // Meeste uren = first
       const perc = findPercentage(toetsingsinkomenKinderopvang, isFirstChild) / 100;
       const toeslagChild = perc * kostenJaar;
       opvangToeslag += toeslagChild;
