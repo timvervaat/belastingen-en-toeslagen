@@ -316,9 +316,19 @@
         const totaalBox3Belasting = box3.box3Belasting;
         const kortingen1 = berekenHeffingskortingen(totaalBox1Inkomen, parseFloat(brutoLoon) || 0);
         const kortingen2 = fiscaalPartner ? berekenHeffingskortingen(totaalBox1Inkomen, parseFloat(brutoLoonPartner) || 0) : { ahk: 0, ak: 0 };
-        const iack1 = berekenIACK(parseFloat(brutoLoon) || 0);
-        const iack2 = fiscaalPartner ? berekenIACK(parseFloat(brutoLoonPartner) || 0) : 0;
-        const iackTotaal = aantalKinderen > 0 ? Math.max(iack1, iack2) : 0;
+               // IACK logica: alleen als minstens 1 kind < 12 jaar
+        const heeftKindOnder12 = kinderenLeeftijden.some(l => l < 12);
+        let iackTotaal = 0;
+        if (heeftKindOnder12 && aantalKinderen > 0) {
+          const iack1 = berekenIACK(parseFloat(brutoLoon) || 0);
+          if (fiscaalPartner) {
+            const iack2 = berekenIACK(parseFloat(brutoLoonPartner) || 0);
+            // Minstverdienende krijgt IACK
+            iackTotaal = (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iack1 : iack2;
+          } else {
+            iackTotaal = iack1;
+          }
+        }
         const totaalHeffingskortingen = kortingen1.ahk + kortingen1.ak + kortingen2.ahk + kortingen2.ak + iackTotaal;
         const brutoBelasting = totaalBox1Belasting + totaalBox3Belasting;
         const nettoBelasting = Math.max(0, brutoBelasting - totaalHeffingskortingen);
