@@ -18,13 +18,13 @@
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #e9ecef; }
     .hidden { display: none; }
-    .child-age-group { margin-top: 10px; }
+    .child-group { margin-top: 20px; border: 1px solid #eee; padding: 10px; border-radius: 4px; background: #f9f9f9; }
   </style>
 </head>
 <body>
 
 <h1>Schatting Belastingen & Toeslagen 2026</h1>
-<p>Vul je gegevens in voor een schatting van box 1/3 belasting (incl. AHK, AK, IACK), heffingskortingen en toeslagen. Gebaseerd op officiële 2026-tabellen (jan 2026).</p>
+<p>Vul je gegevens in voor een schatting van box 1/3 belasting, heffingskortingen en toeslagen. Gebaseerd op officiële 2026-tabellen.</p>
 
 <div class="section">
   <h2>Persoonlijke situatie</h2>
@@ -43,9 +43,9 @@
   </div>
 
   <label>Aantal kinderen onder 18 jaar</label>
-  <input type="number" id="kinderen" min="0" max="10" value="0" onchange="generateChildAges()">
+  <input type="number" id="kinderen" min="0" max="10" value="0" onchange="generateChildFields()">
 
-  <div id="childAges"></div>
+  <div id="childFields"></div>
 
   <label>WOZ-waarde woning (peildatum 1-1-2025, €)</label>
   <input type="number" id="woz" min="0" value="0">
@@ -103,12 +103,6 @@
   <input type="number" id="schulden" min="0" value="0">
 </div>
 
-<div class="section">
-  <h2>Kinderopvang</h2>
-  <label>Totaal kinderopvangkosten per jaar (€)</label>
-  <input type="number" id="opvangJaar" min="0" value="0">
-</div>
-
 <button onclick="bereken()">Bereken schatting 2026</button>
 
 <div id="result"></div>
@@ -119,6 +113,7 @@
 </div>
 
 <script>
+// Functies voor partner en kinderen (zoals eerder)
 function togglePartnerFields() {
   const partner = document.getElementById('partner').value === 'ja';
   document.getElementById('partnerAges').classList.toggle('hidden', !partner);
@@ -126,16 +121,25 @@ function togglePartnerFields() {
   document.getElementById('partner2Loonbel').classList.toggle('hidden', !partner);
 }
 
-function generateChildAges() {
+function generateChildFields() {
   const num = parseInt(document.getElementById('kinderen').value) || 0;
-  const container = document.getElementById('childAges');
+  const container = document.getElementById('childFields');
   container.innerHTML = '';
   for (let i = 1; i <= num; i++) {
     const div = document.createElement('div');
-    div.className = 'child-age-group';
+    div.className = 'child-group';
     div.innerHTML = `
+      <h3>Kind ${i}</h3>
       <label>Leeftijd kind ${i} (in 2026)</label>
       <input type="number" class="childLeeftijd" min="0" max="17" value="10">
+      <label>Soort opvang</label>
+      <select class="childOpvangType">
+        <option value="dagopvang">Dagopvang (€11,23/uur)</option>
+        <option value="bso">Buitenschoolse opvang (€9,98/uur)</option>
+        <option value="gastouder">Gastouderopvang (€8,49/uur)</option>
+      </select>
+      <label>Aantal uren opvang per maand (gemiddeld)</label>
+      <input type="number" class="childUren" min="0" value="0">
     `;
     container.appendChild(div);
   }
@@ -146,6 +150,7 @@ function toggleHuurSection() {
   document.getElementById('huurSection').classList.toggle('hidden', huurt !== 'ja');
 }
 
+// Eigenwoningforfait (staffels 2026)
 function berekenEigenwoningforfait(woz) {
   if (woz <= 12500) return 0;
   if (woz <= 25000) return woz * 0.0010;
@@ -155,17 +160,15 @@ function berekenEigenwoningforfait(woz) {
   return 4725 + (woz - 1350000) * 0.0235;
 }
 
-function berekenAHK(verzamel, isAOW) {
-  const maxAHK = isAOW ? 1556 : 3115;
-  const afbouwStart = 28406;
-  const afbouwPerc = isAOW ? 0.03195 : 0.06337;
-  const afbouwEinde = 76817;
-  if (verzamel <= afbouwStart) return maxAHK;
-  if (verzamel >= afbouwEinde) return 0;
-  return maxAHK - afbouwPerc * (verzamel - afbouwStart);
+// AHK (algemene heffingskorting)
+function berekenAHK(verzamel) {
+  if (verzamel <= 28406) return 3068;
+  if (verzamel >= 76817) return 0;
+  return 3068 - 0.06337 * (verzamel - 28406);
 }
 
-function berekenAK(arbeids, isAOW) {
+// AK (arbeidskorting)
+function berekenAK(arbeids) {
   if (arbeids <= 12169) return 0.08053 * arbeids;
   if (arbeids <= 26288) return 980 + 0.3003 * (arbeids - 12169);
   if (arbeids <= 43071) return 5220 + 0.02258 * (arbeids - 26288);
@@ -173,52 +176,135 @@ function berekenAK(arbeids, isAOW) {
   return 0;
 }
 
-function berekenIACK(lowestArbeids) {
-  const start = 6145;
-  const end = 32223;
-  const maxIACK = 2986;
-  const rate = 0.1145;
-  if (lowestArbeids <= start) return 0;
-  if (lowestArbeids >= end) return maxIACK;
-  return rate * (lowestArbeids - start);
+// IACK
+function berekenIACK(arbeids) {
+  if (arbeids <= 6145) return 0;
+  if (arbeids >= 32223) return 2986;
+  return 0.1145 * (arbeids - 6145);
+}
+
+// Kinderopvang percentages tabel 2026 (gezamenlijk toetsingsinkomen)
+const percentagesTable = [
+  { rangeStart: 0, rangeEnd: 24149, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 24150, rangeEnd: 25756, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 25757, rangeEnd: 27363, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 27364, rangeEnd: 28973, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 28974, rangeEnd: 30579, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 30580, rangeEnd: 32189, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 32190, rangeEnd: 33795, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 33796, rangeEnd: 35400, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 35401, rangeEnd: 37129, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 37130, rangeEnd: 38855, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 38856, rangeEnd: 40586, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 40587, rangeEnd: 42313, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 42314, rangeEnd: 44046, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 44047, rangeEnd: 45776, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 45777, rangeEnd: 47546, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 47547, rangeEnd: 49318, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 49319, rangeEnd: 51092, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 51093, rangeEnd: 52864, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 52865, rangeEnd: 54641, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 54642, rangeEnd: 56412, first: 96.0, subsequent: 96.0 },
+  { rangeStart: 56413, rangeEnd: 58184, first: 95.5, subsequent: 95.6 },
+  { rangeStart: 58185, rangeEnd: 59957, first: 94.8, subsequent: 95.6 },
+  { rangeStart: 59958, rangeEnd: 61895, first: 93.9, subsequent: 95.6 },
+  { rangeStart: 61896, rangeEnd: 65695, first: 92.4, subsequent: 95.6 },
+  { rangeStart: 65696, rangeEnd: 69492, first: 91.6, subsequent: 95.2 },
+  { rangeStart: 69493, rangeEnd: 73292, first: 90.5, subsequent: 94.6 },
+  { rangeStart: 73293, rangeEnd: 77094, first: 88.2, subsequent: 94.2 },
+  { rangeStart: 77095, rangeEnd: 80891, first: 85.9, subsequent: 93.9 },
+  { rangeStart: 80892, rangeEnd: 84693, first: 83.7, subsequent: 93.2 },
+  { rangeStart: 84694, rangeEnd: 88491, first: 81.2, subsequent: 92.7 },
+  { rangeStart: 88492, rangeEnd: 92291, first: 78.9, subsequent: 92.2 },
+  { rangeStart: 92292, rangeEnd: 96091, first: 76.7, subsequent: 91.5 },
+  { rangeStart: 96092, rangeEnd: 99889, first: 74.3, subsequent: 90.9 },
+  { rangeStart: 99890, rangeEnd: 103694, first: 72.1, subsequent: 90.5 },
+  { rangeStart: 103695, rangeEnd: 107492, first: 69.6, subsequent: 90.2 },
+  { rangeStart: 107493, rangeEnd: 111290, first: 67.3, subsequent: 89.5 },
+  { rangeStart: 111291, rangeEnd: 115090, first: 65.1, subsequent: 89.1 },
+  { rangeStart: 115091, rangeEnd: 118963, first: 62.7, subsequent: 88.6 },
+  { rangeStart: 118964, rangeEnd: 122857, first: 60.6, subsequent: 87.9 },
+  { rangeStart: 122858, rangeEnd: 126747, first: 58.5, subsequent: 87.4 },
+  { rangeStart: 126748, rangeEnd: 130638, first: 56.4, subsequent: 87.0 },
+  { rangeStart: 130639, rangeEnd: 134527, first: 54.2, subsequent: 86.7 },
+  { rangeStart: 134528, rangeEnd: 138420, first: 52.3, subsequent: 86.0 },
+  { rangeStart: 138421, rangeEnd: 142312, first: 50.4, subsequent: 85.4 },
+  { rangeStart: 142313, rangeEnd: 146205, first: 48.5, subsequent: 85.0 },
+  { rangeStart: 146206, rangeEnd: 150092, first: 46.5, subsequent: 84.4 },
+  { rangeStart: 150093, rangeEnd: 153982, first: 44.5, subsequent: 84.0 },
+  { rangeStart: 153983, rangeEnd: 157877, first: 42.5, subsequent: 83.3 },
+  { rangeStart: 157878, rangeEnd: 161766, first: 40.5, subsequent: 82.7 },
+  { rangeStart: 161767, rangeEnd: 165657, first: 38.5, subsequent: 81.7 },
+  { rangeStart: 165658, rangeEnd: 169547, first: 36.5, subsequent: 81.4 },
+  { rangeStart: 169548, rangeEnd: 173440, first: 36.5, subsequent: 80.6 },
+  { rangeStart: 173441, rangeEnd: 177335, first: 36.5, subsequent: 79.7 },
+  { rangeStart: 177336, rangeEnd: 181223, first: 36.5, subsequent: 79.1 },
+  { rangeStart: 181224, rangeEnd: 185114, first: 36.5, subsequent: 78.2 },
+  { rangeStart: 185115, rangeEnd: 189002, first: 36.5, subsequent: 77.7 },
+  { rangeStart: 189003, rangeEnd: 192896, first: 36.5, subsequent: 76.9 },
+  { rangeStart: 192897, rangeEnd: 196789, first: 36.5, subsequent: 76.2 },
+  { rangeStart: 196790, rangeEnd: 200681, first: 36.5, subsequent: 75.5 },
+  { rangeStart: 200682, rangeEnd: 204571, first: 36.5, subsequent: 74.5 },
+  { rangeStart: 204572, rangeEnd: 208458, first: 36.5, subsequent: 74.0 },
+  { rangeStart: 208459, rangeEnd: 212353, first: 36.5, subsequent: 73.3 },
+  { rangeStart: 212354, rangeEnd: 216242, first: 36.5, subsequent: 72.5 },
+  { rangeStart: 216243, rangeEnd: 220134, first: 36.5, subsequent: 71.8 },
+  { rangeStart: 220135, rangeEnd: 224026, first: 36.5, subsequent: 71.2 },
+  { rangeStart: 224027, rangeEnd: 227915, first: 36.5, subsequent: 70.4 },
+  { rangeStart: 227916, rangeEnd: 231807, first: 36.5, subsequent: 69.6 },
+  { rangeStart: 231808, rangeEnd: 235697, first: 36.5, subsequent: 69.1 },
+  { rangeStart: 235698, rangeEnd: Infinity, first: 36.5, subsequent: 68.2 }
+];
+
+const maxHourlyRates2026 = {
+  dagopvang: 11.23,
+  bso: 9.98,
+  gastouder: 8.49
+};
+
+function findPercentage(toetsingsinkomen, isFirstChild) {
+  for (let entry of percentagesTable) {
+    if (toetsingsinkomen >= entry.rangeStart && toetsingsinkomen <= entry.rangeEnd) {
+      return isFirstChild ? entry.first : entry.subsequent;
+    }
+  }
+  return 33.0; // minimum percentage als buiten tabel
 }
 
 function bereken() {
+  // Basis inputs
   const partner = document.getElementById('partner').value === 'ja';
   const brutoloon1 = parseFloat(document.getElementById('brutoloon1').value) || 0;
-  const brutoloon2 = partner ? (parseFloat(document.getElementById('brutoloon2').value) || 0) : 0;
+  const brutoloon2 = partner ? parseFloat(document.getElementById('brutoloon2').value) || 0 : 0;
   const totaalBrutoLoon = brutoloon1 + brutoloon2;
   const loonbel1 = parseFloat(document.getElementById('loonbel1').value) || 0;
-  const loonbel2 = partner ? (parseFloat(document.getElementById('loonbel2').value) || 0) : 0;
+  const loonbel2 = partner ? parseFloat(document.getElementById('loonbel2').value) || 0 : 0;
   const totaalLoonbel = loonbel1 + loonbel2;
   const hypotheekrente = parseFloat(document.getElementById('hypotheekrente').value) || 0;
   const spaargeld = parseFloat(document.getElementById('spaargeld').value) || 0;
   const overig = parseFloat(document.getElementById('overigVermogen').value) || 0;
   const schulden = parseFloat(document.getElementById('schulden').value) || 0;
-  const opvangJaar = parseFloat(document.getElementById('opvangJaar').value) || 0;
   const woz = parseFloat(document.getElementById('woz').value) || 0;
   const huurt = document.getElementById('huurt').value === 'ja';
-  const huurMaand = huurt ? (parseFloat(document.getElementById('huur').value) || 0) : 0;
+  const huurMaand = huurt ? parseFloat(document.getElementById('huur').value) || 0 : 0;
   const huurLeeftijd = huurt ? document.getElementById('huurLeeftijd').value : '';
   const kinderen = parseInt(document.getElementById('kinderen').value) || 0;
 
-  // AOW check per persoon
-  const lp1 = parseInt(document.getElementById('leeftijdPartner1').value) || 0;
-  const aow1 = lp1 >= 67;
-  const lp2 = partner ? parseInt(document.getElementById('leeftijdPartner2').value) || 0 : 0;
-  const aow2 = partner ? (lp2 >= 67) : false;
+  // Kindgegevens
+  const childLeeftijden = Array.from(document.querySelectorAll('.childLeeftijd')).map(el => parseInt(el.value) || 18);
+  const childOpvangTypes = Array.from(document.querySelectorAll('.childOpvangType')).map(el => el.value);
+  const childUren = Array.from(document.querySelectorAll('.childUren')).map(el => parseFloat(el.value) || 0);
 
-  // Child ages for IACK (<12)
-  const childAges = Array.from(document.querySelectorAll('.childLeeftijd')).map(el => parseInt(el.value) || 18);
-  const hasYoungChild = childAges.some(age => age < 12);
+  // AOW check
+  const aow1 = parseInt(document.getElementById('leeftijdPartner1').value) || 0 >= 67;
+  const aow2 = partner ? parseInt(document.getElementById('leeftijdPartner2').value) || 0 >= 67 : false;
 
   let html = '<h2>Resultaat schatting 2026</h2>';
 
-  // Eigenwoningforfait + belastbaar box 1
+  // Box 1
   const eigenwoningforfait = berekenEigenwoningforfait(woz);
   const belastbaarBox1 = totaalBrutoLoon + eigenwoningforfait - hypotheekrente;
 
-  // Box 1 tarieven (gezamenlijk)
   const ibTarief1 = (aow1 || aow2) ? 0.1785 : 0.3575;
   const ibTarief2 = 0.3756;
   const ibTarief3 = 0.4950;
@@ -231,34 +317,32 @@ function bereken() {
   else ib = schijf1 * ibTarief1 + (schijf2 - schijf1) * ibTarief2 + (belastbaarBox1 - schijf2) * ibTarief3;
 
   // Box 3
-  const vrijstellingBox3 = partner ? 2 * 59357 : 59357;
-  const rendementsgrondslag = Math.max(0, spaargeld + overig - schulden - vrijstellingBox3);
-  const fictRendement = (spaargeld * 0.0128) + (overig * 0.06) - (schulden * 0.027);
-  const box3Inkomen = Math.max(0, fictRendement);
-  const box3Belasting = box3Inkomen * 0.36;
+  const vrijstelling = partner ? 2 * 59357 : 59357;
+  let rendementsgrondslag = Math.max(0, spaargeld + overig - schulden - vrijstelling);
+  let fictRendement = (spaargeld * 0.0128) + (overig * 0.06) - (schulden * 0.027);
+  let box3Inkomen = Math.max(0, fictRendement);
+  let box3Belasting = box3Inkomen * 0.36;
 
-  // Verzamelinkomen approx voor kortingen (box 1 + box 3)
+  // Verzamelinkomen voor kortingen
   const verzamelTotaal = belastbaarBox1 + box3Inkomen;
 
-  // Kortingen per persoon
-  const share = 1 / (partner ? 2 : 1);
-  const verzamelPerPers1 = brutoloon1 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share;
-  const verzamelPerPers2 = partner ? (brutoloon2 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share) : 0;
+  // Kortingen (AHK, AK, IACK)
+  const share = partner ? 0.5 : 1;
+  const verzamel1 = brutoloon1 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share;
+  const verzamel2 = partner ? brutoloon2 + eigenwoningforfait * share - hypotheekrente * share + box3Inkomen * share : 0;
 
-  const ahk1 = berekenAHK(verzamelPerPers1, aow1);
-  const ahk2 = partner ? berekenAHK(verzamelPerPers2, aow2) : 0;
+  const ahk1 = berekenAHK(verzamel1);
+  const ahk2 = partner ? berekenAHK(verzamel2) : 0;
   const totalAHK = ahk1 + ahk2;
 
-  const ak1 = berekenAK(brutoloon1, aow1);
-  const ak2 = partner ? berekenAK(brutoloon2, aow2) : 0;
+  const ak1 = berekenAK(brutoloon1);
+  const ak2 = partner ? berekenAK(brutoloon2) : 0;
   const totalAK = ak1 + ak2;
 
-  // IACK: alleen minstverdienende als jong kind
   let iack = 0;
-  if (hasYoungChild) {
-    let lowestArbeids = Math.min(brutoloon1, brutoloon2 || Infinity);
-    let isAOWLowest = (lowestArbeids === brutoloon1 ? aow1 : aow2);
-    iack = berekenIACK(lowestArbeids, isAOWLowest);
+  if (childLeeftijden.some(age => age < 12)) {
+    const lowestArbeids = Math.min(brutoloon1, brutoloon2 || Infinity);
+    iack = berekenIACK(lowestArbeids);
   }
 
   const totalKortingen = totalAHK + totalAK + iack;
@@ -266,9 +350,10 @@ function bereken() {
   // Te betalen box 1
   const teBetalenBox1 = Math.max(0, ib - totalKortingen - totaalLoonbel);
 
-  let toetsInkomen = verzamelTotaal; // ruw voor toeslagen
+  // Toetsingsinkomen kinderopvang = belastbaar box 1 (gezamenlijk)
+  const toetsingsinkomenKinderopvang = belastbaarBox1;
 
-  html += `<p><b>Box 1 bruto belasting (incl. eigenwoningforfait €${Math.round(eigenwoningforfait)}):</b> €${Math.round(ib).toLocaleString('nl-NL')}</p>`;
+  html += `<p><b>Box 1 bruto belasting (incl. eigenwoningforfait €${Math.round(eigenwoningforfait).toLocaleString('nl-NL')}):</b> €${Math.round(ib).toLocaleString('nl-NL')}</p>`;
   html += `<p><b>Algemene heffingskorting (totaal):</b> €${Math.round(totalAHK).toLocaleString('nl-NL')}</p>`;
   html += `<p><b>Arbeidskorting (totaal):</b> €${Math.round(totalAK).toLocaleString('nl-NL')}</p>`;
   html += `<p><b>Inkomensafhankelijke combinatiekorting (IACK):</b> €${Math.round(iack).toLocaleString('nl-NL')}</p>`;
@@ -276,61 +361,47 @@ function bereken() {
 
   html += `<p><b>Box 3 vermogensrendementsheffing:</b> €${Math.round(box3Belasting).toLocaleString('nl-NL')}</p>`;
 
-  // Zorgtoeslag
+  // Zorgtoeslag (ruw)
+  let zorg = 0;
   let zorgMaxMaand = partner ? 246 : 129;
   let zorgGrens = partner ? 51142 : 40857;
-  let zorg = 0;
-  if (toetsInkomen < 29500) zorg = zorgMaxMaand * 12;
-  else if (toetsInkomen < zorgGrens) {
-    let afbouw = (toetsInkomen - 29500) / (zorgGrens - 29500);
+  if (verzamelTotaal < 29500) zorg = zorgMaxMaand * 12;
+  else if (verzamelTotaal < zorgGrens) {
+    let afbouw = (verzamelTotaal - 29500) / (zorgGrens - 29500);
     zorg = zorgMaxMaand * 12 * (1 - afbouw * 0.8);
   }
   html += `<p><b>Zorgtoeslag schatting (jaar):</b> €${Math.round(zorg).toLocaleString('nl-NL')}</p>`;
 
-  // Huurtoeslag
+  // Huurtoeslag (ruw)
   let huurtoeslag = 0;
   if (huurt) {
     let maxHuur = (huurLeeftijd === 'onder21') ? 498.20 : 932.93;
     let rekenHuur = Math.min(huurMaand, maxHuur);
     let huurtoeslagMaand = 0;
-    if (rekenHuur > 200 && toetsInkomen < (partner ? 60000 : 45000) + kinderen*5000) {
-      huurtoeslagMaand = Math.max(0, (rekenHuur * 12 - 3000) * 0.4 - toetsInkomen * 0.15) / 12;
+    if (rekenHuur > 200 && verzamelTotaal < (partner ? 60000 : 45000) + kinderen*5000) {
+      huurtoeslagMaand = Math.max(0, (rekenHuur * 12 - 3000) * 0.4 - verzamelTotaal * 0.15) / 12;
     }
     huurtoeslag = huurtoeslagMaand * 12;
     html += `<p><b>Huurtoeslag schatting (jaar):</b> €${Math.round(huurtoeslag).toLocaleString('nl-NL')}</p>`;
   }
 
-  // Kinderopvangtoeslag
+  // Kinderopvangtoeslag (2026 tabel)
   let opvangToeslag = 0;
-  if (opvangJaar > 0 && toetsInkomen < 140000) {
-    let perc = 0.96;
-    if (toetsInkomen > 56000) perc -= (toetsInkomen - 56000) / 100000 * 0.63;
-    perc = Math.max(0.33, perc);
-    opvangToeslag = opvangJaar * perc;
+  let opvangDetails = '<h3>Kinderopvangtoeslag details:</h3>';
+  if (kinderen > 0) {
+    for (let i = 0; i < kinderen; i++) {
+      const urenMaand = childUren[i];
+      const type = childOpvangTypes[i];
+      const maxPrijsUur = maxHourlyRates2026[type];
+      const kostenJaar = maxPrijsUur * urenMaand * 12;
+      const isFirstChild = i === 0;
+      const perc = findPercentage(toetsingsinkomenKinderopvang, isFirstChild) / 100;
+      const toeslagChild = perc * kostenJaar;
+      opvangToeslag += toeslagChild;
+      opvangDetails += `<p>Kind ${i+1} (${type}, ${urenMaand} uur/maand): Max kosten €${kostenJaar.toLocaleString('nl-NL')} (perc ${perc * 100}%), toeslag €${Math.round(toeslagChild).toLocaleString('nl-NL')}</p>`;
+    }
+  } else {
+    opvangDetails += '<p>Geen kinderen of geen opvang opgegeven.</p>';
   }
-  html += `<p><b>Kinderopvangtoeslag schatting (jaar):</b> €${Math.round(opvangToeslag).toLocaleString('nl-NL')}</p>`;
-
-  // Totaal
-  let totaalToeslagen = zorg + huurtoeslag + opvangToeslag;
-  let nettoBelasting = teBetalenBox1 + box3Belasting - totaalToeslagen;
-
-  html += `<hr><h3>Totaaloverzicht</h3>
-  <table>
-    <tr><th>Omschrijving</th><th>Bedrag (€/jaar)</th></tr>
-    <tr><td>Toeslagen totaal</td><td>+${Math.round(totaalToeslagen).toLocaleString('nl-NL')}</td></tr>
-    <tr><td>Belasting box 1 + 3 schatting</td><td>-${Math.round(teBetalenBox1 + box3Belasting).toLocaleString('nl-NL')}</td></tr>
-    <tr><td><b>Netto schatting (belasting min toeslagen)</b></td><td><b>${Math.round(nettoBelasting).toLocaleString('nl-NL')}</b></td></tr>
-  </table>`;
-
-  document.getElementById('result').innerHTML = html;
-}
-
-// Initieel laden
-window.onload = function() {
-  togglePartnerFields();
-  generateChildAges();
-  toggleHuurSection();
-};
-</script>
-</body>
-</html>
+  html += opvangDetails;
+  html += `<p><b>Kinderopvangtoeslag schatting (
