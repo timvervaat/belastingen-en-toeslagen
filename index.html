@@ -369,272 +369,170 @@
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
                 <div className="flex items-center gap-3 mb-2">
                   <Calculator className="w-8 h-8" />
-                  <h1 className="text-3xl font-bold">Belasting en Toeslagen Calculator 2026</h1>
+                  <h1 className="text-3xl font-bold">Belastingen en toeslagen calculator 2026</h1>
                 </div>
-                <p className="text-blue-100">Indicatie Nederlandse belasting en toeslagen 2026</p>
+                <p className="text-blue-100">Bereken uw Nederlandse belastingen en toeslagen voor het jaar 2026</p>
               </div>
-
               <div className="border-b border-gray-200">
                 <div className="flex">
-                  <button onClick={() => setActiveTab('stamgegevens')} className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'stamgegevens' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}><Users className="inline mr-2 w-5 h-5" />Stamgegevens</button>
-                  <button onClick={() => setActiveTab('box1')} className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'box1' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}><Euro className="inline mr-2 w-5 h-5" />Box 1</button>
-                  <button onClick={() => setActiveTab('box3')} className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'box3' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}><TrendingUp className="inline mr-2 w-5 h-5" />Box 3</button>
-                  <button onClick={() => setActiveTab('resultaten')} className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'resultaten' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}><FileText className="inline mr-2 w-5 h-5" />Resultaten</button>
+                  <button onClick={() => setActiveTab('stamgegevens')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'stamgegevens' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Users className="inline mr-2 w-5 h-5" />Stamgegevens</button>
+                  <button onClick={() => setActiveTab('box1')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box1' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Euro className="inline mr-2 w-5 h-5" />Box 1</button>
+                  <button onClick={() => setActiveTab('box3')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box3' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><TrendingUp className="inline mr-2 w-5 h-5" />Box 3</button>
+                  <button onClick={() => setActiveTab('resultaten')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'resultaten' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><FileText className="inline mr-2 w-5 h-5" />Resultaten</button>
                 </div>
               </div>
-
               <div className="p-6">
                 {activeTab === 'stamgegevens' && (
                   <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Stamgegevens</h2>
                     <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
                       <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" checked={fiscaalPartner} onChange={e => setFiscaalPartner(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                        <input type="checkbox" checked={fiscaalPartner} onChange={(e) => setFiscaalPartner(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
                         <span className="font-semibold text-gray-800">Fiscaal partner</span>
                       </label>
                     </div>
-
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2"><Baby className="inline w-4 h-4 mr-1" />Aantal kinderen</label>
-                      <input type="number" min="0" value={aantalKinderen} onChange={e => updateAantalKinderen(parseInt(e.target.value) || 0)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      <input type="number" min="0" value={aantalKinderen} onChange={(e) => updateAantalKinderen(parseInt(e.target.value) || 0)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                     </div>
-
                     {aantalKinderen > 0 && (
-                      <>
-                        <div className="bg-purple-50 p-4 rounded-lg space-y-3">
-                          <h3 className="font-semibold text-gray-800">Leeftijden kinderen (kinderbijslag & IACK)</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {Array.from({length: aantalKinderen}).map((_, i) => (
-                              <div key={i}>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Leeftijd kind {i+1} (0-17)</label>
-                                <input type="number" min="0" max="17" value={kinderenLeeftijden[i] || ''} onChange={e => updateKindLeeftijd(i, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 8" />
-                              </div>
-                            ))}
-                          </div>
+                      <div className="bg-purple-50 p-4 rounded-lg space-y-3">
+                        <h3 className="font-semibold text-gray-800">Leeftijden kinderen (voor kinderbijslag)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Array.from({ length: aantalKinderen }).map((_, index) => (
+                            <div key={index}>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Leeftijd kind {index + 1} (0-17 jaar)</label>
+                              <input type="number" min="0" max="17" value={kinderenLeeftijden[index] || ''} onChange={(e) => updateKindLeeftijd(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 10" />
+                            </div>
+                          ))}
                         </div>
-
-                        <div className="bg-teal-50 p-4 rounded-lg space-y-3">
-                          <h3 className="font-semibold text-gray-800">Kinderopvang (uren/maand & type)</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {Array.from({length: aantalKinderen}).map((_, i) => (
-                              <div key={i} className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Kind {i+1} - Uren per maand (max 230)</label>
-                                <input type="number" min="0" max="230" value={kindOpvang[i]?.uren || ''} onChange={e => updateKindOpvangUren(i, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 160" />
-                                <label className="block text-sm font-medium text-gray-700 mt-2">Type opvang</label>
-                                <select value={kindOpvang[i]?.type || 'dagopvang'} onChange={e => updateKindOpvangType(i, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                  <option value="dagopvang">Dagopvang</option>
-                                  <option value="bso">BSO</option>
-                                  <option value="gastouder">Gastouder</option>
-                                </select>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
+                      </div>
                     )}
-
+                    {aantalKinderen > 0 && (
+                      <div className="bg-teal-50 p-4 rounded-lg space-y-3">
+                        <h3 className="font-semibold text-gray-800">Kinderopvang (uren per maand en type)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Array.from({ length: aantalKinderen }).map((_, index) => (
+                            <div key={index} className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-700">Kind {index + 1} - Uren per maand (max 230)</label>
+                              <input type="number" min="0" max="230" value={kindOpvang[index]?.uren || ''} onChange={(e) => updateKindOpvangUren(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 40" />
+                              <label className="block text-sm font-medium text-gray-700">Type opvang</label>
+                              <select value={kindOpvang[index]?.type || 'dagopvang'} onChange={(e) => updateKindOpvangType(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="dagopvang">Dagopvang</option>
+                                <option value="bso">BSO</option>
+                                <option value="gastouder">Gastouder</option>
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                       <h3 className="font-semibold text-gray-800 flex items-center"><Home className="w-5 h-5 mr-2" />WOZ-waarde eigen woning</h3>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">WOZ-waarde (€)</label>
-                      <input type="number" value={wozWaarde} onChange={e => setWozWaarde(e.target.value)} placeholder="Bijv. 350000" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      <div><label className="block text-sm font-medium text-gray-700 mb-2">WOZ-waarde (€)</label><input type="number" value={wozWaarde} onChange={(e) => setWozWaarde(e.target.value)} placeholder="Bijv. 350000" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" /></div>
                     </div>
                   </div>
                 )}
-
                 {activeTab === 'box1' && (
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 1 – Inkomsten uit werk en woning</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
                         <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoon} onChange={e => setBrutoLoon(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Hypotheekrente (€)</label><input type="number" value={eigenWoningRente} onChange={e => setEigenWoningRente(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="8000" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">AOV-premie (€)</label><input type="number" value={arbeidsongeschiktheid} onChange={e => setArbeidsongeschiktheid(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="2000" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffing} onChange={e => setIngehoudenLoonheffing(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="15000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoon} onChange={(e) => setBrutoLoon(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRente} onChange={(e) => setEigenWoningRente(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="8000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheid} onChange={(e) => setArbeidsongeschiktheid(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="2000" /></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffing} onChange={(e) => setIngehoudenLoonheffing(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="15000" /></div>
                       </div>
-
                       {fiscaalPartner && (
                         <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
                           <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoonPartner} onChange={e => setBrutoLoonPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="40000" /></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Hypotheekrente (€)</label><input type="number" value={eigenWoningRentePartner} onChange={e => setEigenWoningRentePartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">AOV-premie (€)</label><input type="number" value={arbeidsongeschiktheidPartner} onChange={e => setArbeidsongeschiktheidPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffingPartner} onChange={e => setIngehoudenLoonheffingPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="12000" /></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoonPartner} onChange={(e) => setBrutoLoonPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="40000" /></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRentePartner} onChange={(e) => setEigenWoningRentePartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheidPartner} onChange={(e) => setArbeidsongeschiktheidPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffingPartner} onChange={(e) => setIngehoudenLoonheffingPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="12000" /></div>
                         </div>
                       )}
                     </div>
                   </div>
                 )}
-
                 {activeTab === 'box3' && (
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 3 – Sparen en beleggen</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h2>
                     <p className="text-sm text-gray-600 mb-4">Peildatum: 1 januari 2026</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
                         <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Banktegoeden (€)</label><input type="number" value={bankrekeningen} onChange={e => setBankrekeningen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Forfait 1,28%</p></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen/overig (€)</label><input type="number" value={beleggingen} onChange={e => setBeleggingen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /><p className="text-xs text-gray-500 mt-1">Forfait 6,00%</p></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schulden} onChange={e => setSchulden(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="10000" /><p className="text-xs text-gray-500 mt-1">Forfait 2,70% (na drempel)</p></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningen} onChange={(e) => setBankrekeningen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingen} onChange={(e) => setBeleggingen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
+                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schulden} onChange={(e) => setSchulden(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="10000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
                       </div>
-
                       {fiscaalPartner && (
                         <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
                           <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Banktegoeden (€)</label><input type="number" value={bankrekeningenPartner} onChange={e => setBankrekeningenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="20000" /><p className="text-xs text-gray-500 mt-1">Forfait 1,28%</p></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen/overig (€)</label><input type="number" value={beleggingenPartner} onChange={e => setBeleggingenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Forfait 6,00%</p></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schuldenPartner} onChange={e => setSchuldenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="5000" /><p className="text-xs text-gray-500 mt-1">Forfait 2,70% (na drempel)</p></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningenPartner} onChange={(e) => setBankrekeningenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="20000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingenPartner} onChange={(e) => setBeleggingenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
+                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schuldenPartner} onChange={(e) => setSchuldenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="5000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
                         </div>
                       )}
                     </div>
-                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded text-sm text-gray-700">
-                      <strong>Let op:</strong> Heffingsvrij vermogen 2026: €57.684 pp (€115.368 met partner). Schulddrempel €3.800 pp (€7.600 met partner).
-                    </div>
+                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded"><p className="text-sm text-gray-700"><strong>Let op:</strong> Heffingsvrij vermogen is €59.357 per persoon (gezamenlijk €118.714 bij fiscaal partner). Schuldendrempel €3.800 per persoon (€7.600 bij partner).</p></div>
                   </div>
                 )}
-
                 {activeTab === 'resultaten' && resultaten && (
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Resultaten 2026</h2>
-
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekening resultaten 2026</h2>
                     <div className="bg-blue-50 p-6 rounded-lg">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 1 – Werk en woning</h3>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Persoon 1 – Inkomen Box 1</p>
-                          <p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p>
-                          <p className="text-sm text-gray-600 mt-2">Persoon 1 – Voorlopige belasting</p>
-                          <p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p>
-                        </div>
-                        {fiscaalPartner && (
-                          <div>
-                            <p className="text-sm text-gray-600">Persoon 2 – Inkomen Box 1</p>
-                            <p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p>
-                            <p className="text-sm text-gray-600 mt-2">Persoon 2 – Voorlopige belasting</p>
-                            <p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p>
-                          </div>
-                        )}
+                        <div><p className="text-sm text-gray-600">Persoon 1 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p></div>
+                        {fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p></div>)}
                       </div>
-                      <div className="mt-4 pt-4 border-t border-blue-200">
-                        <p className="text-sm text-gray-600">Totaal Box 1 belasting</p>
-                        <p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.box1Belasting)}</p>
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600">Heffingskortingen (AHK + AK)</p>
-                        <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.heffingskortingen - resultaten.totaal.iackTotaal)}</p>
-                      </div>
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-600">Inkomensafhankelijke combinatiekorting (IACK)</p>
-                        <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.iackTotaal)}</p>
-                        {resultaten.totaal.iackTotaal > 0 && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            Toegekend aan: {fiscaalPartner ? (parseFloat(brutoLoon) <= parseFloat(brutoLoonPartner) ? 'Persoon 1 (minstverdienend)' : 'Persoon 2 (minstverdienend)') : 'Uzelf'} (kind <12 jaar vereist)
-                          </p>
-                        )}
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600">Ingehouden loonheffing</p>
-                        <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</p>
-                      </div>
+                      <div className="mt-4 pt-4 border-t border-blue-200"><p className="text-sm text-gray-600">Totaal Box 1 belasting:</p><p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.box1Belasting)}</p></div>
+                      <div className="mt-4"><p className="text-sm text-gray-600">Heffingskortingen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.totaal.heffingskortingen)}</p></div>
+                      <div className="mt-4"><p className="text-sm text-gray-600">Ingehouden loonheffing:</p><p className="text-lg font-semibold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</p></div>
                     </div>
-
                     <div className="bg-green-50 p-6 rounded-lg">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 3 – Sparen & beleggen</h3>
-                      <p className="text-sm text-gray-600">Belastbaar vermogen:</p>
-                      <p className="text-lg font-semibold">{formatEuro(resultaten.box3.belastbaarVermogen)}</p>
-                      <p className="text-sm text-gray-600 mt-2">Box 3 belasting:</p>
-                      <p className="text-lg font-semibold">{formatEuro(resultaten.box3.box3Belasting)}</p>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h3>
+                      <p className="text-sm text-gray-600">Belastbaar vermogen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.box3.belastbaarVermogen)}</p>
+                      <p className="text-sm text-gray-600 mt-2">Box 3 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.box3.box3Belasting)}</p>
                     </div>
-
-                    {aantalKinderen > 0 && (
-                      <>
-                        <div className="bg-pink-50 p-6 rounded-lg">
-                          <h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kindgebonden budget</h3>
-                          <p className="text-2xl font-bold text-pink-700">{formatEuro(resultaten.totaal.kindgebondenBudget)}</p>
-                        </div>
-
-                        <div className="bg-indigo-50 p-6 rounded-lg">
-                          <h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderbijslag</h3>
-                          <div className="space-y-2">
-                            {resultaten.totaal.kinderbijslag.details.map(d => (
-                              <div key={d.kind} className="flex justify-between text-sm bg-white p-2 rounded">
-                                <span>Kind {d.kind} ({d.leeftijd} jr, {d.percentage})</span>
-                                <span className="font-semibold">{formatEuro(d.kwartaal)} / kwartaal</span>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="mt-4 pt-3 border-t border-indigo-200">
-                            <p className="text-sm text-gray-600">Totaal per jaar:</p>
-                            <p className="text-2xl font-bold text-indigo-700">{formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</p>
-                          </div>
-                        </div>
-
-                        <div className="bg-teal-50 p-6 rounded-lg">
-                          <h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderopvangtoeslag</h3>
-                          <p className="text-2xl font-bold text-teal-700">{formatEuro(resultaten.totaal.kinderopvangtoeslag)}</p>
-                          <p className="text-xs text-gray-500 mt-2">Gebaseerd op toetsingsinkomen €{Math.round(resultaten.totaal.verzamelinkomen).toLocaleString('nl-NL')} en ingevoerde uren</p>
-                        </div>
-                      </>
-                    )}
-
+                    <div className="bg-purple-50 p-6 rounded-lg">
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">Heffingskortingen</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><p className="text-sm text-gray-600">Persoon 1 - Algemene heffingskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.kortingen.ahk)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Arbeidskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.kortingen.ak)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - IACK:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.iack)}</p></div>
+                        {fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Algemene heffingskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.kortingen.ahk)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Arbeidskorting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.kortingen.ak)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - IACK:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.iack)}</p></div>)}
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-purple-200"><p className="text-sm text-gray-600">Totaal heffingskortingen:</p><p className="text-2xl font-bold text-purple-700">{formatEuro(resultaten.totaal.heffingskortingen)}</p></div>
+                    </div>
+                    {aantalKinderen > 0 && (<>
+                      <div className="bg-pink-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kindgebonden budget</h3><p className="text-sm text-gray-600">Jaarlijks kindgebonden budget ({aantalKinderen} {aantalKinderen === 1 ? 'kind' : 'kinderen'}):</p><p className="text-2xl font-bold text-pink-700">{formatEuro(resultaten.totaal.kindgebondenBudget)}</p><p className="text-xs text-gray-500 mt-2">Dit bedrag ontvangt u maandelijks via de Belastingdienst Toeslagen</p></div>
+                      <div className="bg-indigo-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderbijslag</h3><p className="text-sm text-gray-600 mb-3">Kinderbijslag per kind (uitbetaald per kwartaal door SVB):</p><div className="space-y-2 mb-4">{resultaten.totaal.kinderbijslag.details.map((detail) => (<div key={detail.kind} className="flex justify-between text-sm bg-white p-2 rounded"><span>Kind {detail.kind} ({detail.leeftijd} jaar, {detail.percentage}):</span><span className="font-semibold">{formatEuro(detail.kwartaal)} /kwartaal</span></div>))}</div><div className="pt-3 border-t border-indigo-200"><p className="text-sm text-gray-600">Totaal kinderbijslag per jaar:</p><p className="text-2xl font-bold text-indigo-700">{formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</p></div></div>
+                      <div className="bg-teal-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderopvangtoeslag</h3><p className="text-sm text-gray-600">Jaarlijkse kinderopvangtoeslag:</p><p className="text-2xl font-bold text-teal-700">{formatEuro(resultaten.totaal.kinderopvangtoeslag)}</p><p className="text-xs text-gray-500 mt-2">Gebaseerd op ingevoerde uren en type opvang</p></div>
+                    </>)}
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-lg text-white">
-                      <h3 className="text-2xl font-bold mb-6">Eindresultaat</h3>
-                      <div className="space-y-4">
-                        <div className="flex justify-between text-xl">
-                          <span>Bruto belasting (Box 1 + 3):</span>
-                          <span>{formatEuro(resultaten.totaal.brutoBelasting)}</span>
-                        </div>
-                        <div className="flex justify-between text-xl">
-                          <span>Heffingskortingen:</span>
-                          <span>- {formatEuro(resultaten.totaal.heffingskortingen)}</span>
-                        </div>
-                        <div className="flex justify-between text-xl border-t border-blue-400 pt-3">
-                          <span className="font-bold">Netto te betalen/ontvangen:</span>
-                          <span className="font-bold">{formatEuro(resultaten.totaal.nettoBelasting)}</span>
-                        </div>
-                        <div className="flex justify-between text-xl">
-                          <span>Ingehouden loonheffing:</span>
-                          <span>{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</span>
-                        </div>
-                        <div className="border-t-2 border-white pt-4 mt-4 flex justify-between items-center">
-                          <span className="text-2xl font-bold">{resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen' : 'Te betalen'}</span>
-                          <span className={`text-3xl font-bold ${resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                            {formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}
-                          </span>
-                        </div>
+                      <h3 className="text-2xl font-bold mb-6">Eindresultaat aangifte 2026</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center"><span>Bruto belasting (Box 1 + Box 3):</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.brutoBelasting)}</span></div>
+                        <div className="flex justify-between items-center"><span>Totaal heffingskortingen:</span><span className="text-xl font-bold">- {formatEuro(resultaten.totaal.heffingskortingen)}</span></div>
+                        <div className="border-t border-blue-400 pt-3 flex justify-between items-center"><span className="font-semibold">Netto te betalen belasting:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.nettoBelasting)}</span></div>
+                        <div className="flex justify-between items-center"><span>Ingehouden loonheffing:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</span></div>
+                        <div className="border-t-2 border-white pt-4 mt-4"><div className="flex justify-between items-center"><span className="text-xl font-bold">{resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen:' : 'Te betalen:'}</span><span className={'text-3xl font-bold ' + (resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-300' : 'text-red-300')}>{formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}</span></div></div>
                       </div>
                     </div>
+                    <div className="bg-gray-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4">Samenvatting</h3><ul className="space-y-2 text-sm text-gray-700"><li>• Te {resultaten.totaal.teBetalenOntvangen >= 0 ? 'ontvangen' : 'betalen'} Belastingdienst: <span className={resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-700' : 'text-red-700'}>{formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}</span></li>{aantalKinderen > 0 && (<><li>• Kinderopvangtoeslag (jaarlijks): {formatEuro(resultaten.totaal.kinderopvangtoeslag)}</li><li>• Kindgebonden budget (jaarlijks): {formatEuro(resultaten.totaal.kindgebondenBudget)}</li><li>• Kinderbijslag (jaarlijks): {formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</li></>)}</ul></div>
                   </div>
                 )}
-
-                {activeTab === 'resultaten' && !resultaten && (
-                  <div className="text-center py-12">
-                    <Calculator className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600 text-lg mb-2">Nog geen berekening uitgevoerd</p>
-                    <p className="text-gray-500">Vul gegevens in en klik op Berekenen</p>
-                  </div>
-                )}
+                {activeTab === 'resultaten' && !resultaten && (<div className="text-center py-12"><Calculator className="w-16 h-16 mx-auto text-gray-400 mb-4" /><p className="text-gray-600 text-lg mb-2">Nog geen berekening uitgevoerd</p><p className="text-gray-500 text-sm">Vul eerst alle gegevens in en klik op bereken belasting</p></div>)}
               </div>
-
-              {activeTab !== 'resultaten' && (
-                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-                  <button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl">
-                    <Calculator className="inline w-6 h-6 mr-2" /> Bereken alles
-                  </button>
-                </div>
-              )}
+              {activeTab !== 'resultaten' && (<div className="bg-gray-50 px-6 py-4 border-t border-gray-200"><button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl"><Calculator className="inline w-6 h-6 mr-2" />Bereken belastingen en toeslagen</button></div>)}
             </div>
-
-            <div className="mt-6 text-center text-sm text-gray-600 bg-white p-4 rounded-lg shadow">
-              <p><strong>Disclaimer:</strong> Dit is een indicatieve rekentool. Gebruik officiële tools van de Belastingdienst voor uw aangifte. Tarieven 2026 zijn prognoses per januari 2026.</p>
-            </div>
+            <div className="mt-6 text-center text-sm text-gray-600 bg-white p-4 rounded-lg shadow"><p><strong>Disclaimer:</strong> Deze tool is bedoeld voor indicatieve doeleinden. De werkelijke belasting kan afwijken. Voor officiële berekeningen, raadpleeg de Belastingdienst of een belastingadviseur.</p><p className="mt-2 text-xs">Tarieven en regelgeving 2026 zijn gebaseerd op beschikbare informatie per januari 2026.</p></div>
           </div>
         </div>
       );
     }
-
     ReactDOM.render(<BelastingCalculator />, document.getElementById('root'));
   </script>
 </body>
 </html>
-
