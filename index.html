@@ -101,7 +101,7 @@
         const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
         const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
         const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
-        const heffingsVrijVermogen = fiscaalPartner ? 115368 : 57684;
+        const heffingsVrijVermogen = fiscaalPartner ? 118714 : 59357;
         const schuldDrempel = fiscaalPartner ? 7600 : 3800;
         const totaalBezittingen = bank + beleg;
         const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrijVermogen - Math.max(0, schuld - schuldDrempel));
