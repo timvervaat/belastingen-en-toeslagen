@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belastingen en Toeslagen Calculator 2026</title>
+  <title>Tool belastingen en toeslagen 2026</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,12 +20,13 @@
     const Euro = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12a7.9 7.9 0 0 0 7.8 8 7.7 7.7 0 0 0 5.2-2"/></svg>);
     const TrendingUp = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>);
     const FileText = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
+    const History = ({ className }) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
 
     function BelastingCalculator() {
       const [fiscaalPartner, setFiscaalPartner] = useState(false);
       const [aantalKinderen, setAantalKinderen] = useState(0);
       const [kinderenLeeftijden, setKinderenLeeftijden] = useState([]);
-      const [kindOpvang, setKindOpvang] = useState([]); // [{uren: number, type: 'dagopvang'|'bso'|'gastouder'}]
+      const [kindOpvang, setKindOpvang] = useState([]);
       const [wozWaarde, setWozWaarde] = useState('');
       const [brutoLoon, setBrutoLoon] = useState('');
       const [brutoLoonPartner, setBrutoLoonPartner] = useState('');
@@ -43,6 +44,7 @@
       const [ingehoudenLoonheffingPartner, setIngehoudenLoonheffingPartner] = useState('');
       const [resultaten, setResultaten] = useState(null);
       const [activeTab, setActiveTab] = useState('stamgegevens');
+      const [berekeningenLog, setBerekeningenLog] = useState([]);
 
       const updateAantalKinderen = (aantal) => {
         setAantalKinderen(aantal);
@@ -98,46 +100,31 @@
       };
 
       const berekenBox3 = (bank1, beleg1, schuld1, bank2 = 0, beleg2 = 0, schuld2 = 0) => {
-  const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
-  const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
-  const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
+        const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
+        const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
+        const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
+        const heffingsVrij = fiscaalPartner ? 118714 : 59357;
+        const schuldDrempel = fiscaalPartner ? 7600 : 3800;
+        const totaalBezittingen = bank + beleg;
+        const nettoSchuldCorrectie = Math.max(0, schuld - schuldDrempel);
+        const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrij - nettoSchuldCorrectie);
+        let belastbaarRendement = 0;
+        if (belastbaarVermogen > 0) {
+          const totaalBruto = bank + beleg + nettoSchuldCorrectie;
+          if (totaalBruto > 0) {
+            const fractieBank = bank / totaalBruto;
+            const fractieBeleg = beleg / totaalBruto;
+            const rendBankDeel = belastbaarVermogen * fractieBank * 0.0128;
+            const rendBelegDeel = belastbaarVermogen * fractieBeleg * 0.06;
+            const rendSchuldDeel = nettoSchuldCorrectie * 0.027;
+            belastbaarRendement = rendBankDeel + rendBelegDeel - rendSchuldDeel;
+            belastbaarRendement = Math.max(0, belastbaarRendement);
+          }
+        }
+        const box3Belasting = belastbaarRendement * 0.36;
+        return { belastbaarVermogen, belastbaarRendement, box3Belasting };
+      };
 
-  const heffingsVrij = fiscaalPartner ? 118714 : 59357;     // 2026-bedragen
-  const schuldDrempel = fiscaalPartner ? 7600 : 3800;
-
-  const totaalBezittingen = bank + beleg;
-  const nettoSchuldCorrectie = Math.max(0, schuld - schuldDrempel);
-
-  const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrij - nettoSchuldCorrectie);
-
-  let belastbaarRendement = 0;
-
-  if (belastbaarVermogen > 0) {
-    // Verdeling van het belastbare vermogen over de categorieën (pro rata)
-    const totaalBruto = bank + beleg + nettoSchuldCorrectie; // schuld telt negatief mee in rendement
-
-    if (totaalBruto > 0) {
-      const fractieBank = bank / totaalBruto;
-      const fractieBeleg = beleg / totaalBruto;
-      // fractieSchuld = nettoSchuldCorrectie / totaalBruto; (negatief effect)
-
-      const rendBankDeel     = belastbaarVermogen * fractieBank * 0.0128;
-      const rendBelegDeel    = belastbaarVermogen * fractieBeleg * 0.06;
-      const rendSchuldDeel   = nettoSchuldCorrectie * 0.027; // schuld blijft apart
-
-      belastbaarRendement = rendBankDeel + rendBelegDeel - rendSchuldDeel;
-      belastbaarRendement = Math.max(0, belastbaarRendement);
-    }
-  }
-
-  const box3Belasting = belastbaarRendement * 0.36;
-
-  return {
-    belastbaarVermogen,
-    belastbaarRendement,
-    box3Belasting
-  };
-};
       const berekenHeffingskortingen = (verzamelinkomen, arbeidsinkomen) => {
         let ahk = 3115;
         if (verzamelinkomen > 29736) {
@@ -167,7 +154,7 @@
 
       const berekenKindgebondenBudget = (toetsInkomen, aantal) => {
         if (aantal === 0) return 0;
-        let maxBedrag = 2580 * aantal; // basis per kind
+        let maxBedrag = 2580 * aantal;
         const drempel = fiscaalPartner ? 39141 : 29736;
         if (toetsInkomen <= drempel) return maxBedrag;
         const vermindering = (toetsInkomen - drempel) * 0.076;
@@ -175,113 +162,101 @@
       };
 
       const berekenKinderopvangtoeslag = (toetsInkomen, opvangDetails) => {
-  if (!opvangDetails || opvangDetails.length === 0) return 0;
-
-  // Officiële schijven 2026 (array van {van, tot, percEerste, percVolgend})
-  const schijven = [
-    { van: 0, tot: 24149, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 24150, tot: 25756, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 25757, tot: 27363, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 27364, tot: 28973, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 28974, tot: 30579, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 30580, tot: 32189, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 32190, tot: 33795, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 33796, tot: 35400, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 35401, tot: 37129, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 37130, tot: 38855, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 38856, tot: 40586, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 40587, tot: 42313, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 42314, tot: 44046, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 44047, tot: 45776, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 45777, tot: 47546, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 47547, tot: 49318, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 49319, tot: 51092, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 51093, tot: 52864, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 52865, tot: 54641, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 54642, tot: 56412, percEerste: 0.960, percVolgend: 0.960 },
-    { van: 56413, tot: 58184, percEerste: 0.955, percVolgend: 0.956 },
-    { van: 58185, tot: 59957, percEerste: 0.948, percVolgend: 0.956 },
-    { van: 59958, tot: 61895, percEerste: 0.939, percVolgend: 0.956 },
-    { van: 61896, tot: 65695, percEerste: 0.924, percVolgend: 0.956 },
-    { van: 65696, tot: 69492, percEerste: 0.916, percVolgend: 0.952 },
-    { van: 69493, tot: 73292, percEerste: 0.905, percVolgend: 0.946 },
-    { van: 73293, tot: 77094, percEerste: 0.882, percVolgend: 0.942 },
-    { van: 77095, tot: 80891, percEerste: 0.859, percVolgend: 0.939 },
-    { van: 80892, tot: 84693, percEerste: 0.837, percVolgend: 0.932 },
-    { van: 84694, tot: 88491, percEerste: 0.812, percVolgend: 0.927 },
-    { van: 88492, tot: 92291, percEerste: 0.789, percVolgend: 0.922 },
-    { van: 92292, tot: 96091, percEerste: 0.767, percVolgend: 0.915 },
-    { van: 96092, tot: 99889, percEerste: 0.743, percVolgend: 0.909 },
-    { van: 99890, tot: 103694, percEerste: 0.721, percVolgend: 0.905 },
-    { van: 103695, tot: 107492, percEerste: 0.696, percVolgend: 0.902 },
-    { van: 107493, tot: 111290, percEerste: 0.673, percVolgend: 0.895 },
-    { van: 111291, tot: 115090, percEerste: 0.651, percVolgend: 0.891 },
-    { van: 115091, tot: 118963, percEerste: 0.627, percVolgend: 0.886 },
-    { van: 118964, tot: 122857, percEerste: 0.606, percVolgend: 0.879 },
-    { van: 122858, tot: 126747, percEerste: 0.585, percVolgend: 0.874 },
-    { van: 126748, tot: 130638, percEerste: 0.564, percVolgend: 0.870 },
-    { van: 130639, tot: 134527, percEerste: 0.542, percVolgend: 0.867 },
-    { van: 134528, tot: 138420, percEerste: 0.523, percVolgend: 0.860 },
-    { van: 138421, tot: 142312, percEerste: 0.504, percVolgend: 0.854 },
-    { van: 142313, tot: 146205, percEerste: 0.485, percVolgend: 0.850 },
-    { van: 146206, tot: 150092, percEerste: 0.465, percVolgend: 0.844 },
-    { van: 150093, tot: 153982, percEerste: 0.445, percVolgend: 0.840 },
-    { van: 153983, tot: 157877, percEerste: 0.425, percVolgend: 0.833 },
-    { van: 157878, tot: 161766, percEerste: 0.405, percVolgend: 0.827 },
-    { van: 161767, tot: 165657, percEerste: 0.385, percVolgend: 0.817 },
-    { van: 165658, tot: 169547, percEerste: 0.365, percVolgend: 0.814 },
-    { van: 169548, tot: 173440, percEerste: 0.365, percVolgend: 0.806 },
-    { van: 173441, tot: 177335, percEerste: 0.365, percVolgend: 0.797 },
-    { van: 177336, tot: 181223, percEerste: 0.365, percVolgend: 0.791 },
-    { van: 181224, tot: 185114, percEerste: 0.365, percVolgend: 0.782 },
-    { van: 185115, tot: 189002, percEerste: 0.365, percVolgend: 0.777 },
-    { van: 189003, tot: 192896, percEerste: 0.365, percVolgend: 0.769 },
-    { van: 192897, tot: 196789, percEerste: 0.365, percVolgend: 0.762 },
-    { van: 196790, tot: 200681, percEerste: 0.365, percVolgend: 0.755 },
-    { van: 200682, tot: 204571, percEerste: 0.365, percVolgend: 0.745 },
-    { van: 204572, tot: 208458, percEerste: 0.365, percVolgend: 0.740 },
-    { van: 208459, tot: 212353, percEerste: 0.365, percVolgend: 0.733 },
-    { van: 212354, tot: 216242, percEerste: 0.365, percVolgend: 0.725 },
-    { van: 216243, tot: 220134, percEerste: 0.365, percVolgend: 0.718 },
-    { van: 220135, tot: 224026, percEerste: 0.365, percVolgend: 0.712 },
-    { van: 224027, tot: 227915, percEerste: 0.365, percVolgend: 0.704 },
-    { van: 227916, tot: 231807, percEerste: 0.365, percVolgend: 0.696 },
-    { van: 231808, tot: 235697, percEerste: 0.365, percVolgend: 0.691 },
-    { van: 235698, tot: Infinity, percEerste: 0.365, percVolgend: 0.682 }  // en hoger
-  ];
-
-  // Zoek juiste schijf
-  let percEerste = 0.365;  // fallback minimum
-  let percVolgend = 0.682;
-  for (const schijf of schijven) {
-    if (toetsInkomen >= schijf.van && toetsInkomen <= schijf.tot) {
-      percEerste = schijf.percEerste;
-      percVolgend = schijf.percVolgend;
-      break;
-    }
-  }
-
-  let totaal = 0;
-
-  // Sorteer opvang op aantal uren (hoogste uren = 'eerste kind' percentage)
-  const gesorteerd = [...opvangDetails].sort((a, b) => (b.uren || 0) - (a.uren || 0));
-
-  gesorteerd.forEach((opv, index) => {
-    const urenMaand = Math.min(opv.uren || 0, 230);
-    const urenJaar = urenMaand * 12;
-
-    let maxPrijs = 0;
-    if (opv.type === 'dagopvang') maxPrijs = 11.23;
-    if (opv.type === 'bso') maxPrijs = 9.98;
-    if (opv.type === 'gastouder') maxPrijs = 8.49;
-
-    const perc = (index === 0) ? percEerste : percVolgend;
-
-    totaal += urenJaar * maxPrijs * perc;
-  });
-
-  return Math.round(totaal);  // Afronden op hele euro's (gebruikelijk bij toeslagen)
-};
+        if (!opvangDetails || opvangDetails.length === 0) return 0;
+        const schijven = [
+          { van: 0, tot: 24149, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 24150, tot: 25756, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 25757, tot: 27363, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 27364, tot: 28973, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 28974, tot: 30579, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 30580, tot: 32189, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 32190, tot: 33795, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 33796, tot: 35400, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 35401, tot: 37129, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 37130, tot: 38855, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 38856, tot: 40586, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 40587, tot: 42313, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 42314, tot: 44046, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 44047, tot: 45776, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 45777, tot: 47546, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 47547, tot: 49318, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 49319, tot: 51092, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 51093, tot: 52864, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 52865, tot: 54641, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 54642, tot: 56412, percEerste: 0.960, percVolgend: 0.960 },
+          { van: 56413, tot: 58184, percEerste: 0.955, percVolgend: 0.956 },
+          { van: 58185, tot: 59957, percEerste: 0.948, percVolgend: 0.956 },
+          { van: 59958, tot: 61895, percEerste: 0.939, percVolgend: 0.956 },
+          { van: 61896, tot: 65695, percEerste: 0.924, percVolgend: 0.956 },
+          { van: 65696, tot: 69492, percEerste: 0.916, percVolgend: 0.952 },
+          { van: 69493, tot: 73292, percEerste: 0.905, percVolgend: 0.946 },
+          { van: 73293, tot: 77094, percEerste: 0.882, percVolgend: 0.942 },
+          { van: 77095, tot: 80891, percEerste: 0.859, percVolgend: 0.939 },
+          { van: 80892, tot: 84693, percEerste: 0.837, percVolgend: 0.932 },
+          { van: 84694, tot: 88491, percEerste: 0.812, percVolgend: 0.927 },
+          { van: 88492, tot: 92291, percEerste: 0.789, percVolgend: 0.922 },
+          { van: 92292, tot: 96091, percEerste: 0.767, percVolgend: 0.915 },
+          { van: 96092, tot: 99889, percEerste: 0.743, percVolgend: 0.909 },
+          { van: 99890, tot: 103694, percEerste: 0.721, percVolgend: 0.905 },
+          { van: 103695, tot: 107492, percEerste: 0.696, percVolgend: 0.902 },
+          { van: 107493, tot: 111290, percEerste: 0.673, percVolgend: 0.895 },
+          { van: 111291, tot: 115090, percEerste: 0.651, percVolgend: 0.891 },
+          { van: 115091, tot: 118963, percEerste: 0.627, percVolgend: 0.886 },
+          { van: 118964, tot: 122857, percEerste: 0.606, percVolgend: 0.879 },
+          { van: 122858, tot: 126747, percEerste: 0.585, percVolgend: 0.874 },
+          { van: 126748, tot: 130638, percEerste: 0.564, percVolgend: 0.870 },
+          { van: 130639, tot: 134527, percEerste: 0.542, percVolgend: 0.867 },
+          { van: 134528, tot: 138420, percEerste: 0.523, percVolgend: 0.860 },
+          { van: 138421, tot: 142312, percEerste: 0.504, percVolgend: 0.854 },
+          { van: 142313, tot: 146205, percEerste: 0.485, percVolgend: 0.850 },
+          { van: 146206, tot: 150092, percEerste: 0.465, percVolgend: 0.844 },
+          { van: 150093, tot: 153982, percEerste: 0.445, percVolgend: 0.840 },
+          { van: 153983, tot: 157877, percEerste: 0.425, percVolgend: 0.833 },
+          { van: 157878, tot: 161766, percEerste: 0.405, percVolgend: 0.827 },
+          { van: 161767, tot: 165657, percEerste: 0.385, percVolgend: 0.817 },
+          { van: 165658, tot: 169547, percEerste: 0.365, percVolgend: 0.814 },
+          { van: 169548, tot: 173440, percEerste: 0.365, percVolgend: 0.806 },
+          { van: 173441, tot: 177335, percEerste: 0.365, percVolgend: 0.797 },
+          { van: 177336, tot: 181223, percEerste: 0.365, percVolgend: 0.791 },
+          { van: 181224, tot: 185114, percEerste: 0.365, percVolgend: 0.782 },
+          { van: 185115, tot: 189002, percEerste: 0.365, percVolgend: 0.777 },
+          { van: 189003, tot: 192896, percEerste: 0.365, percVolgend: 0.769 },
+          { van: 192897, tot: 196789, percEerste: 0.365, percVolgend: 0.762 },
+          { van: 196790, tot: 200681, percEerste: 0.365, percVolgend: 0.755 },
+          { van: 200682, tot: 204571, percEerste: 0.365, percVolgend: 0.745 },
+          { van: 204572, tot: 208458, percEerste: 0.365, percVolgend: 0.740 },
+          { van: 208459, tot: 212353, percEerste: 0.365, percVolgend: 0.733 },
+          { van: 212354, tot: 216242, percEerste: 0.365, percVolgend: 0.725 },
+          { van: 216243, tot: 220134, percEerste: 0.365, percVolgend: 0.718 },
+          { van: 220135, tot: 224026, percEerste: 0.365, percVolgend: 0.712 },
+          { van: 224027, tot: 227915, percEerste: 0.365, percVolgend: 0.704 },
+          { van: 227916, tot: 231807, percEerste: 0.365, percVolgend: 0.696 },
+          { van: 231808, tot: 235697, percEerste: 0.365, percVolgend: 0.691 },
+          { van: 235698, tot: Infinity, percEerste: 0.365, percVolgend: 0.682 }
+        ];
+        let percEerste = 0.365;
+        let percVolgend = 0.682;
+        for (const schijf of schijven) {
+          if (toetsInkomen >= schijf.van && toetsInkomen <= schijf.tot) {
+            percEerste = schijf.percEerste;
+            percVolgend = schijf.percVolgend;
+            break;
+          }
+        }
+        let totaal = 0;
+        const gesorteerd = [...opvangDetails].sort((a, b) => (b.uren || 0) - (a.uren || 0));
+        gesorteerd.forEach((opv, index) => {
+          const urenMaand = Math.min(opv.uren || 0, 230);
+          const urenJaar = urenMaand * 12;
+          let maxPrijs = 0;
+          if (opv.type === 'dagopvang') maxPrijs = 11.23;
+          if (opv.type === 'bso') maxPrijs = 9.98;
+          if (opv.type === 'gastouder') maxPrijs = 8.49;
+          const perc = (index === 0) ? percEerste : percVolgend;
+          totaal += urenJaar * maxPrijs * perc;
+        });
+        return Math.round(totaal);
+      };
 
       const berekenKinderbijslag = (leeftijden) => {
         let totaalJaar = 0;
@@ -307,289 +282,311 @@
       };
 
       const berekenAlles = () => {
-  const wozNum = parseFloat(wozWaarde) || 0;
-  const box1P1 = berekenBox1(brutoLoon, eigenWoningRente, arbeidsongeschiktheid, wozNum);
-  const box1P2 = fiscaalPartner ? berekenBox1(brutoLoonPartner, eigenWoningRentePartner, arbeidsongeschiktheidPartner, 0) : { box1Inkomen: 0, belasting: 0 };
-  const totaalBox1Inkomen = box1P1.box1Inkomen + box1P2.box1Inkomen;
-  const totaalBox1Belasting = box1P1.belasting + box1P2.belasting;
-  const box3 = berekenBox3(bankrekeningen, beleggingen, schulden, bankrekeningenPartner, beleggingenPartner, schuldenPartner);
-  const totaalBox3Belasting = box3.box3Belasting;
-  
-  // CORRECTIE: Gebruik individueel Box 1 inkomen per persoon voor AHK berekening
-  const kortingen1 = berekenHeffingskortingen(box1P1.box1Inkomen, parseFloat(brutoLoon) || 0);
-  const kortingen2 = fiscaalPartner ? berekenHeffingskortingen(box1P2.box1Inkomen, parseFloat(brutoLoonPartner) || 0) : { ahk: 0, ak: 0 };
-  
-  // IACK logica: alleen als minstens 1 kind < 12 jaar
-  const heeftKindOnder12 = kinderenLeeftijden.some(l => l < 12);
-  let iackTotaal = 0;
-  if (heeftKindOnder12 && aantalKinderen > 0) {
-    const iack1 = berekenIACK(parseFloat(brutoLoon) || 0);
-    if (fiscaalPartner) {
-      const iack2 = berekenIACK(parseFloat(brutoLoonPartner) || 0);
-      // Minstverdienende krijgt IACK
-      iackTotaal = (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iack1 : iack2;
-    } else {
-      iackTotaal = iack1;
-    }
-  }
-  const totaalHeffingskortingen = kortingen1.ahk + kortingen1.ak + kortingen2.ahk + kortingen2.ak + iackTotaal;
-  const brutoBelasting = totaalBox1Belasting + totaalBox3Belasting;
-  const nettoBelasting = Math.max(0, brutoBelasting - totaalHeffingskortingen);
-  const totaalIngehoudenLoonheffing = (parseFloat(ingehoudenLoonheffing) || 0) + (parseFloat(ingehoudenLoonheffingPartner) || 0);
-  const teBetalenOntvangen = totaalIngehoudenLoonheffing - nettoBelasting;
-  const kindgebondenBudget = berekenKindgebondenBudget(totaalBox1Inkomen, aantalKinderen);
-  const kinderbijslag = berekenKinderbijslag(kinderenLeeftijden);
-  const kinderopvangtoeslag = berekenKinderopvangtoeslag(totaalBox1Inkomen, kindOpvang);
-  setResultaten({
-    persoon1: {box1: box1P1, kortingen: kortingen1, iack: iackTotaal > 0 && (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iackTotaal : 0},
-    persoon2: {box1: box1P2, kortingen: kortingen2, iack: iackTotaal > 0 && fiscaalPartner && (parseFloat(brutoLoonPartner) || 0) < (parseFloat(brutoLoon) || 0) ? iackTotaal : 0},
-    box3,
-    totaal: {
-      box1Inkomen: totaalBox1Inkomen,
-      box1Belasting: totaalBox1Belasting,
-      box3Belasting: totaalBox3Belasting,
-      brutoBelasting,
-      heffingskortingen: totaalHeffingskortingen,
-      nettoBelasting,
-      ingehoudenLoonheffing: totaalIngehoudenLoonheffing,
-      teBetalenOntvangen,
-      kindgebondenBudget,
-      kinderbijslag,
-      kinderopvangtoeslag,
-      verzamelinkomen: totaalBox1Inkomen,
-      iackTotaal
-    }
-  });
-  setActiveTab('resultaten');
-};
+        const wozNum = parseFloat(wozWaarde) || 0;
+        const box1P1 = berekenBox1(brutoLoon, eigenWoningRente, arbeidsongeschiktheid, wozNum);
+        const box1P2 = fiscaalPartner ? berekenBox1(brutoLoonPartner, eigenWoningRentePartner, arbeidsongeschiktheidPartner, 0) : { box1Inkomen: 0, belasting: 0 };
+        const totaalBox1Inkomen = box1P1.box1Inkomen + box1P2.box1Inkomen;
+        const totaalBox1Belasting = box1P1.belasting + box1P2.belasting;
+        const box3 = berekenBox3(bankrekeningen, beleggingen, schulden, bankrekeningenPartner, beleggingenPartner, schuldenPartner);
+        const totaalBox3Belasting = box3.box3Belasting;
+        
+        const kortingen1 = berekenHeffingskortingen(box1P1.box1Inkomen, parseFloat(brutoLoon) || 0);
+        const kortingen2 = fiscaalPartner ? berekenHeffingskortingen(box1P2.box1Inkomen, parseFloat(brutoLoonPartner) || 0) : { ahk: 0, ak: 0 };
+        
+        const heeftKindOnder12 = kinderenLeeftijden.some(l => l < 12);
+        let iackTotaal = 0;
+        if (heeftKindOnder12 && aantalKinderen > 0) {
+          const iack1 = berekenIACK(parseFloat(brutoLoon) || 0);
+          if (fiscaalPartner) {
+            const iack2 = berekenIACK(parseFloat(brutoLoonPartner) || 0);
+            iackTotaal = (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iack1 : iack2;
+          } else {
+            iackTotaal = iack1;
+          }
+        }
+        const totaalHeffingskortingen = kortingen1.ahk + kortingen1.ak + kortingen2.ahk + kortingen2.ak + iackTotaal;
+        const brutoBelasting = totaalBox1Belasting + totaalBox3Belasting;
+        const nettoBelasting = Math.max(0, brutoBelasting - totaalHeffingskortingen);
+        const totaalIngehoudenLoonheffing = (parseFloat(ingehoudenLoonheffing) || 0) + (parseFloat(ingehoudenLoonheffingPartner) || 0);
+        const teBetalenOntvangen = totaalIngehoudenLoonheffing - nettoBelasting;
+        const kindgebondenBudget = berekenKindgebondenBudget(totaalBox1Inkomen, aantalKinderen);
+        const kinderbijslag = berekenKinderbijslag(kinderenLeeftijden);
+        const kinderopvangtoeslag = berekenKinderopvangtoeslag(totaalBox1Inkomen, kindOpvang);
+        
+        const nieuweResultaten = {
+          persoon1: {box1: box1P1, kortingen: kortingen1, iack: iackTotaal > 0 && (parseFloat(brutoLoon) || 0) <= (parseFloat(brutoLoonPartner) || 0) ? iackTotaal : 0},
+          persoon2: {box1: box1P2, kortingen: kortingen2, iack: iackTotaal > 0 && fiscaalPartner && (parseFloat(brutoLoonPartner) || 0) < (parseFloat(brutoLoon) || 0) ? iackTotaal : 0},
+          box3,
+          totaal: {
+            box1Inkomen: totaalBox1Inkomen,
+            box1Belasting: totaalBox1Belasting,
+            box3Belasting: totaalBox3Belasting,
+            brutoBelasting,
+            heffingskortingen: totaalHeffingskortingen,
+            nettoBelasting,
+            ingehoudenLoonheffing: totaalIngehoudenLoonheffing,
+            teBetalenOntvangen,
+            kindgebondenBudget,
+            kinderbijslag,
+            kinderopvangtoeslag,
+            verzamelinkomen: totaalBox1Inkomen,
+        iackTotaal
+      }
+    };
+    
+    const logEntry = {
+      timestamp: new Date().toLocaleString('nl-NL'),
+      input: {
+        fiscaalPartner,
+        aantalKinderen,
+        brutoLoon: parseFloat(brutoLoon) || 0,
+        brutoLoonPartner: parseFloat(brutoLoonPartner) || 0,
+        wozWaarde: wozNum,
+        bankrekeningen: (parseFloat(bankrekeningen) || 0) + (parseFloat(bankrekeningenPartner) || 0),
+        beleggingen: (parseFloat(beleggingen) || 0) + (parseFloat(beleggingenPartner) || 0),
+        schulden: (parseFloat(schulden) || 0) + (parseFloat(schuldenPartner) || 0)
+      },
+      resultaten: nieuweResultaten
+    };
+    
+    setBerekeningenLog(prev => [logEntry, ...prev].slice(0, 10));
+    setResultaten(nieuweResultaten);
+    setActiveTab('resultaten');
+  };
 
-      const formatEuro = (bedrag) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(bedrag);
+  const formatEuro = (bedrag) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(bedrag);
 
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
-                <div className="flex items-center gap-3 mb-2">
-                  <Calculator className="w-8 h-8" />
-                  <h1 className="text-3xl font-bold">Belastingen en toeslagen calculator 2026</h1>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+            <div className="flex items-center gap-3 mb-2">
+              <Calculator className="w-8 h-8" />
+              <h1 className="text-3xl font-bold">Belastingen en toeslagen calculator 2026</h1>
+            </div>
+            <p className="text-blue-100">Bereken uw Nederlandse belastingen en toeslagen voor het jaar 2026</p>
+          </div>
+          <div className="border-b border-gray-200">
+            <div className="flex">
+              <button onClick={() => setActiveTab('stamgegevens')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'stamgegevens' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Users className="inline mr-2 w-5 h-5" />Stamgegevens</button>
+              <button onClick={() => setActiveTab('box1')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box1' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Euro className="inline mr-2 w-5 h-5" />Box 1</button>
+              <button onClick={() => setActiveTab('box3')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box3' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><TrendingUp className="inline mr-2 w-5 h-5" />Box 3</button>
+              <button onClick={() => setActiveTab('resultaten')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'resultaten' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><FileText className="inline mr-2 w-5 h-5" />Resultaten</button>
+              <button onClick={() => setActiveTab('log')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'log' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><History className="inline mr-2 w-5 h-5" />Log ({berekeningenLog.length})</button>
+            </div>
+          </div>
+          <div className="p-6">
+            {activeTab === 'stamgegevens' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Stamgegevens</h2>
+                <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" checked={fiscaalPartner} onChange={(e) => setFiscaalPartner(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                    <span className="font-semibold text-gray-800">Fiscaal partner</span>
+                  </label>
                 </div>
-                <p className="text-blue-100">Bereken uw Nederlandse belastingen en toeslagen voor het jaar 2026</p>
-              </div>
-              <div className="border-b border-gray-200">
-                <div className="flex">
-                  <button onClick={() => setActiveTab('stamgegevens')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'stamgegevens' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Users className="inline mr-2 w-5 h-5" />Stamgegevens</button>
-                  <button onClick={() => setActiveTab('box1')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box1' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><Euro className="inline mr-2 w-5 h-5" />Box 1</button>
-                  <button onClick={() => setActiveTab('box3')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'box3' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><TrendingUp className="inline mr-2 w-5 h-5" />Box 3</button>
-                  <button onClick={() => setActiveTab('resultaten')} className={'flex-1 px-6 py-4 font-semibold transition-colors ' + (activeTab === 'resultaten' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700' : 'text-gray-600 hover:bg-gray-50')}><FileText className="inline mr-2 w-5 h-5" />Resultaten</button>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2"><Baby className="inline w-4 h-4 mr-1" />Aantal kinderen</label>
+                  <input type="number" min="0" value={aantalKinderen} onChange={(e) => updateAantalKinderen(parseInt(e.target.value) || 0)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                 </div>
-              </div>
-              <div className="p-6">
-                {activeTab === 'stamgegevens' && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Stamgegevens</h2>
-                    <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
-                      <label className="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" checked={fiscaalPartner} onChange={(e) => setFiscaalPartner(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-                        <span className="font-semibold text-gray-800">Fiscaal partner</span>
-                      </label>
+                {aantalKinderen > 0 && (
+                  <div className="bg-purple-50 p-4 rounded-lg space-y-3">
+                    <h3 className="font-semibold text-gray-800">Leeftijden kinderen (voor kinderbijslag)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Array.from({ length: aantalKinderen }).map((_, index) => (
+                        <div key={index}>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Leeftijd kind {index + 1} (0-17 jaar)</label>
+                          <input type="number" min="0" max="17" value={kinderenLeeftijden[index] || ''} onChange={(e) => updateKindLeeftijd(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 10" />
+                        </div>
+                      ))}
                     </div>
+                  </div>
+                )}
+                {aantalKinderen > 0 && (
+                  <div className="bg-teal-50 p-4 rounded-lg space-y-3">
+                    <h3 className="font-semibold text-gray-800">Kinderopvang (uren per maand en type)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Array.from({ length: aantalKinderen }).map((_, index) => (
+                        <div key={index} className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">Kind {index + 1} - Uren per maand (max 230)</label>
+                          <input type="number" min="0" max="230" value={kindOpvang[index]?.uren || ''} onChange={(e) => updateKindOpvangUren(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 40" />
+                          <label className="block text-sm font-medium text-gray-700">Type opvang</label>
+                          <select value={kindOpvang[index]?.type || 'dagopvang'} onChange={(e) => updateKindOpvangType(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="dagopvang">Dagopvang</option>
+                            <option value="bso">BSO</option>
+                            <option value="gastouder">Gastouder</option>
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                  <h3 className="font-semibold text-gray-800 flex items-center"><Home className="w-5 h-5 mr-2" />WOZ-waarde eigen woning</h3>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-2">WOZ-waarde (€)</label><input type="number" value={wozWaarde} onChange={(e) => setWozWaarde(e.target.value)} placeholder="Bijv. 350000" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" /></div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'box1' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
+                    <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoon} onChange={(e) => setBrutoLoon(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /></div>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRente} onChange={(e) => setEigenWoningRente(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="8000" /></div>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheid} onChange={(e) => setArbeidsongeschiktheid(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="2000" /></div>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffing} onChange={(e) => setIngehoudenLoonheffing(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="15000" /></div>
+                  </div>
+                  {fiscaalPartner && (
+                    <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
+                      <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoonPartner} onChange={(e) => setBrutoLoonPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="40000" /></div>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRentePartner} onChange={(e) => setEigenWoningRentePartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheidPartner} onChange={(e) => setArbeidsongeschiktheidPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffingPartner} onChange={(e) => setIngehoudenLoonheffingPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="12000" /></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {activeTab === 'box3' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h2>
+                <p className="text-sm text-gray-600 mb-4">Peildatum: 1 januari 2026</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
+                    <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningen} onChange={(e) => setBankrekeningen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingen} onChange={(e) => setBeleggingen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
+                    <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schulden} onChange={(e) => setSchulden(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="10000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
+                  </div>
+                  {fiscaalPartner && (
+                    <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
+                      <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningenPartner} onChange={(e) => setBankrekeningenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="20000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingenPartner} onChange={(e) => setBeleggingenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schuldenPartner} onChange={(e) => setSchuldenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="5000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
+                    </div>
+                  )}
+                </div>
+                <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded"><p className="text-sm text-gray-700"><strong>Let op:</strong> Heffingsvrij vermogen is €59.357 per persoon (gezamenlijk €118.714 bij fiscaal partner). Schuldendrempel €3.800 per persoon (€7.600 bij partner).</p></div>
+              </div>
+            )}
+            {activeTab === 'resultaten' && resultaten && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekening resultaten 2026</h2>
+                <div className="bg-blue-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><p className="text-sm text-gray-600">Persoon 1 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p></div>
+                    {fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p></div>)}
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-blue-200"><p className="text-sm text-gray-600">Totaal Box 1 belasting:</p><p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.box1Belasting)}</p></div>
+                  <div className="mt-4"><p className="text-sm text-gray-600">Heffingskortingen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.totaal.heffingskortingen)}</p></div>
+                  <div className="mt-4"><p className="text-sm text-gray-600">Ingehouden loonheffing:</p><p className="text-lg font-semibold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</p></div>
+                </div>
+                <div className="bg-green-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h3>
+                  <p className="text-sm text-gray-600">Belastbaar vermogen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.box3.belastbaarVermogen)}</p>
+                  <p className="text-sm text-gray-600 mt-2">Box 3 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.box3.box3Belasting)}</p>
+                </div>
+                <div className="bg-purple-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Heffingskortingen</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2"><Baby className="inline w-4 h-4 mr-1" />Aantal kinderen</label>
-                      <input type="number" min="0" value={aantalKinderen} onChange={(e) => updateAantalKinderen(parseInt(e.target.value) || 0)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      <p className="text-sm font-semibold text-gray-700 mb-2">Persoon 1</p>
+                      <div className="space-y-2 bg-white p-3 rounded">
+                        <div className="flex justify-between text-sm">
+                          <span>Algemene heffingskorting:</span>
+                          <span className="font-semibold">{formatEuro(resultaten.persoon1.kortingen.ahk)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Arbeidskorting:</span>
+                          <span className="font-semibold">{formatEuro(resultaten.persoon1.kortingen.ak)}</span>
+                        </div>
+                        {resultaten.persoon1.iack > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span>IACK:</span>
+                            <span className="font-semibold">{formatEuro(resultaten.persoon1.iack)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm pt-2 border-t border-gray-200 font-semibold">
+                          <span>Totaal persoon 1:</span>
+                          <span>{formatEuro(resultaten.persoon1.kortingen.ahk + resultaten.persoon1.kortingen.ak + resultaten.persoon1.iack)}</span>
+                        </div>
+                      </div>
                     </div>
-                    {aantalKinderen > 0 && (
-                      <div className="bg-purple-50 p-4 rounded-lg space-y-3">
-                        <h3 className="font-semibold text-gray-800">Leeftijden kinderen (voor kinderbijslag)</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {Array.from({ length: aantalKinderen }).map((_, index) => (
-                            <div key={index}>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Leeftijd kind {index + 1} (0-17 jaar)</label>
-                              <input type="number" min="0" max="17" value={kinderenLeeftijden[index] || ''} onChange={(e) => updateKindLeeftijd(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 10" />
+                    {fiscaalPartner && (
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Persoon 2 (Partner)</p>
+                        <div className="space-y-2 bg-white p-3 rounded">
+                          <div className="flex justify-between text-sm">
+                            <span>Algemene heffingskorting:</span>
+                            <span className="font-semibold">{formatEuro(resultaten.persoon2.kortingen.ahk)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Arbeidskorting:</span>
+                            <span className="font-semibold">{formatEuro(resultaten.persoon2.kortingen.ak)}</span>
+                          </div>
+                          {resultaten.persoon2.iack > 0 && (
+                            <div className="flex justify-between text-sm">
+                              <span>IACK:</span>
+                              <span className="font-semibold">{formatEuro(resultaten.persoon2.iack)}</span>
                             </div>
-                          ))}
+                          )}
+                          <div className="flex justify-between text-sm pt-2 border-t border-gray-200 font-semibold">
+                            <span>Totaal persoon 2:</span>
+                            <span>{formatEuro(resultaten.persoon2.kortingen.ahk + resultaten.persoon2.kortingen.ak + resultaten.persoon2.iack)}</span>
+                          </div>
                         </div>
                       </div>
                     )}
-                    {aantalKinderen > 0 && (
-                      <div className="bg-teal-50 p-4 rounded-lg space-y-3">
-                        <h3 className="font-semibold text-gray-800">Kinderopvang (uren per maand en type)</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {Array.from({ length: aantalKinderen }).map((_, index) => (
-                            <div key={index} className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-700">Kind {index + 1} - Uren per maand (max 230)</label>
-                              <input type="number" min="0" max="230" value={kindOpvang[index]?.uren || ''} onChange={(e) => updateKindOpvangUren(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Bijv. 40" />
-                              <label className="block text-sm font-medium text-gray-700">Type opvang</label>
-                              <select value={kindOpvang[index]?.type || 'dagopvang'} onChange={(e) => updateKindOpvangType(index, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="dagopvang">Dagopvang</option>
-                                <option value="bso">BSO</option>
-                                <option value="gastouder">Gastouder</option>
-                              </select>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-purple-200">
+                    <p className="text-sm text-gray-600">Totaal heffingskortingen:</p>
+                    <p className="text-2xl font-bold text-purple-700">{formatEuro(resultaten.totaal.heffingskortingen)}</p>
+                    {aantalKinderen > 0 && resultaten.totaal.iackTotaal > 0 && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        IACK is toegekend aan {fiscaalPartner ? 'de minstverdienende partner' : 'persoon 1'}
+                      </p>
                     )}
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-                      <h3 className="font-semibold text-gray-800 flex items-center"><Home className="w-5 h-5 mr-2" />WOZ-waarde eigen woning</h3>
-                      <div><label className="block text-sm font-medium text-gray-700 mb-2">WOZ-waarde (€)</label><input type="number" value={wozWaarde} onChange={(e) => setWozWaarde(e.target.value)} placeholder="Bijv. 350000" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" /></div>
-                    </div>
                   </div>
-                )}
-                {activeTab === 'box1' && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
-                        <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoon} onChange={(e) => setBrutoLoon(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRente} onChange={(e) => setEigenWoningRente(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="8000" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheid} onChange={(e) => setArbeidsongeschiktheid(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="2000" /></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffing} onChange={(e) => setIngehoudenLoonheffing(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="15000" /></div>
-                      </div>
-                      {fiscaalPartner && (
-                        <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
-                          <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Brutoloon (€)</label><input type="number" value={brutoLoonPartner} onChange={(e) => setBrutoLoonPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="40000" /></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Betaalde hypotheekrente (€)</label><input type="number" value={eigenWoningRentePartner} onChange={(e) => setEigenWoningRentePartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Arbeidsongeschiktheidsverzekering (€)</label><input type="number" value={arbeidsongeschiktheidPartner} onChange={(e) => setArbeidsongeschiktheidPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="0" /></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Ingehouden loonheffing (€)</label><input type="number" value={ingehoudenLoonheffingPartner} onChange={(e) => setIngehoudenLoonheffingPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="12000" /></div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {activeTab === 'box3' && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h2>
-                    <p className="text-sm text-gray-600 mb-4">Peildatum: 1 januari 2026</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4 bg-blue-50 p-6 rounded-lg">
-                        <h3 className="font-bold text-lg text-gray-800">Persoon 1</h3>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningen} onChange={(e) => setBankrekeningen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingen} onChange={(e) => setBeleggingen(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="50000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
-                        <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schulden} onChange={(e) => setSchulden(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="10000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
-                      </div>
-                      {fiscaalPartner && (
-                        <div className="space-y-4 bg-indigo-50 p-6 rounded-lg">
-                          <h3 className="font-bold text-lg text-gray-800">Persoon 2 (Partner)</h3>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Bankrekeningen (€)</label><input type="number" value={bankrekeningenPartner} onChange={(e) => setBankrekeningenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="20000" /><p className="text-xs text-gray-500 mt-1">Rendement: 1,28%</p></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Beleggingen (€)</label><input type="number" value={beleggingenPartner} onChange={(e) => setBeleggingenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="30000" /><p className="text-xs text-gray-500 mt-1">Rendement: 6,00%</p></div>
-                          <div><label className="block text-sm font-semibold text-gray-700 mb-2">Schulden (€)</label><input type="number" value={schuldenPartner} onChange={(e) => setSchuldenPartner(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="5000" /><p className="text-xs text-gray-500 mt-1">Rendement: 2,70% (na drempel €3.800)</p></div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded"><p className="text-sm text-gray-700"><strong>Let op:</strong> Heffingsvrij vermogen is €59.357 per persoon (gezamenlijk €118.714 bij fiscaal partner). Schuldendrempel €3.800 per persoon (€7.600 bij partner).</p></div>
-                  </div>
-                )}
-                {activeTab === 'resultaten' && resultaten && (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekening resultaten 2026</h2>
-                    <div className="bg-blue-50 p-6 rounded-lg">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><p className="text-sm text-gray-600">Persoon 1 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p></div>
-                        {fiscaalPartner && (<div><p className="text-sm text-gray-600">Persoon 2 - Box 1 inkomen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p><p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 1 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p></div>)}
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-blue-200"><p className="text-sm text-gray-600">Totaal Box 1 belasting:</p><p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.box1Belasting)}</p></div>
-                      <div className="mt-4"><p className="text-sm text-gray-600">Heffingskortingen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.totaal.heffingskortingen)}</p></div>
-                      <div className="mt-4"><p className="text-sm text-gray-600">Ingehouden loonheffing:</p><p className="text-lg font-semibold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</p></div>
-                    </div>
-                    <div className="bg-green-50 p-6 rounded-lg">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 3: Sparen en beleggen</h3>
-                      <p className="text-sm text-gray-600">Belastbaar vermogen:</p><p className="text-lg font-semibold">{formatEuro(resultaten.box3.belastbaarVermogen)}</p>
-                      <p className="text-sm text-gray-600 mt-2">Box 3 belasting:</p><p className="text-lg font-semibold">{formatEuro(resultaten.box3.box3Belasting)}</p>
-                    </div>
-<div className="bg-purple-50 p-6 rounded-lg">
-  <h3 className="text-xl font-bold text-gray-800 mb-4">Heffingskortingen</h3>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <p className="text-sm font-semibold text-gray-700 mb-2">Persoon 1</p>
-      <div className="space-y-2 bg-white p-3 rounded">
-        <div className="flex justify-between text-sm">
-          <span>Algemene heffingskorting:</span>
-          <span className="font-semibold">{formatEuro(resultaten.persoon1.kortingen.ahk)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span>Arbeidskorting:</span>
-          <span className="font-semibold">{formatEuro(resultaten.persoon1.kortingen.ak)}</span>
-        </div>
-        {resultaten.persoon1.iack > 0 && (
-          <div className="flex justify-between text-sm">
-            <span>IACK:</span>
-            <span className="font-semibold">{formatEuro(resultaten.persoon1.iack)}</span>
-          </div>
-        )}
-        <div className="flex justify-between text-sm pt-2 border-t border-gray-200 font-semibold">
-          <span>Totaal persoon 1:</span>
-          <span>{formatEuro(resultaten.persoon1.kortingen.ahk + resultaten.persoon1.kortingen.ak + resultaten.persoon1.iack)}</span>
-        </div>
-      </div>
-    </div>
-    {fiscaalPartner && (
-      <div>
-        <p className="text-sm font-semibold text-gray-700 mb-2">Persoon 2 (Partner)</p>
-        <div className="space-y-2 bg-white p-3 rounded">
-          <div className="flex justify-between text-sm">
-            <span>Algemene heffingskorting:</span>
-            <span className="font-semibold">{formatEuro(resultaten.persoon2.kortingen.ahk)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Arbeidskorting:</span>
-            <span className="font-semibold">{formatEuro(resultaten.persoon2.kortingen.ak)}</span>
-          </div>
-          {resultaten.persoon2.iack > 0 && (
-            <div className="flex justify-between text-sm">
-              <span>IACK:</span>
-              <span className="font-semibold">{formatEuro(resultaten.persoon2.iack)}</span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm pt-2 border-t border-gray-200 font-semibold">
-            <span>Totaal persoon 2:</span>
-            <span>{formatEuro(resultaten.persoon2.kortingen.ahk + resultaten.persoon2.kortingen.ak + resultaten.persoon2.iack)}</span>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-  <div className="mt-4 pt-4 border-t border-purple-200">
-    <p className="text-sm text-gray-600">Totaal heffingskortingen:</p>
-    <p className="text-2xl font-bold text-purple-700">{formatEuro(resultaten.totaal.heffingskortingen)}</p>
-    {aantalKinderen > 0 && resultaten.totaal.iackTotaal > 0 && (
-      <p className="text-sm text-gray-500 mt-2">
-        IACK is toegekend aan {fiscaalPartner ? 'de minstverdienende partner' : 'persoon 1'}
-      </p>
-    )}
-  </div>
-</div>
-                    {aantalKinderen > 0 && (<>
-                      <div className="bg-pink-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kindgebonden budget</h3><p className="text-sm text-gray-600">Jaarlijks kindgebonden budget ({aantalKinderen} {aantalKinderen === 1 ? 'kind' : 'kinderen'}):</p><p className="text-2xl font-bold text-pink-700">{formatEuro(resultaten.totaal.kindgebondenBudget)}</p><p className="text-xs text-gray-500 mt-2">Dit bedrag ontvangt u maandelijks via de Belastingdienst Toeslagen</p></div>
-                      <div className="bg-indigo-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderbijslag</h3><p className="text-sm text-gray-600 mb-3">Kinderbijslag per kind (uitbetaald per kwartaal door SVB):</p><div className="space-y-2 mb-4">{resultaten.totaal.kinderbijslag.details.map((detail) => (<div key={detail.kind} className="flex justify-between text-sm bg-white p-2 rounded"><span>Kind {detail.kind} ({detail.leeftijd} jaar, {detail.percentage}):</span><span className="font-semibold">{formatEuro(detail.kwartaal)} /kwartaal</span></div>))}</div><div className="pt-3 border-t border-indigo-200"><p className="text-sm text-gray-600">Totaal kinderbijslag per jaar:</p><p className="text-2xl font-bold text-indigo-700">{formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</p></div></div>
-                      <div className="bg-teal-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderopvangtoeslag</h3><p className="text-sm text-gray-600">Jaarlijkse kinderopvangtoeslag:</p><p className="text-2xl font-bold text-teal-700">{formatEuro(resultaten.totaal.kinderopvangtoeslag)}</p><p className="text-xs text-gray-500 mt-2">Gebaseerd op ingevoerde uren en type opvang</p></div>
-                    </>)}
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-lg text-white">
-                      <h3 className="text-2xl font-bold mb-6">Eindresultaat aangifte 2026</h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center"><span>Bruto belasting (Box 1 + Box 3):</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.brutoBelasting)}</span></div>
-                        <div className="flex justify-between items-center"><span>Totaal heffingskortingen:</span><span className="text-xl font-bold">- {formatEuro(resultaten.totaal.heffingskortingen)}</span></div>
-                        <div className="border-t border-blue-400 pt-3 flex justify-between items-center"><span className="font-semibold">Netto te betalen belasting:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.nettoBelasting)}</span></div>
-                        <div className="flex justify-between items-center"><span>Ingehouden loonheffing:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</span></div>
-                        <div className="border-t-2 border-white pt-4 mt-4"><div className="flex justify-between items-center"><span className="text-xl font-bold">{resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen:' : 'Te betalen:'}</span><span className={'text-3xl font-bold ' + (resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-300' : 'text-red-300')}>{formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}</span></div></div>
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4">Samenvatting</h3><ul className="space-y-2 text-sm text-gray-700"><li>• Te {resultaten.totaal.teBetalenOntvangen >= 0 ? 'ontvangen' : 'betalen'} Belastingdienst: <span className={resultaten.totaal.teBetalenOntvangen >= 0 ? 'text-green-700' : 'text-red-700'}>{formatEuro(Math.abs(resultaten.totaal.teBetalenOntvangen))}</span></li>{aantalKinderen > 0 && (<><li>• Kinderopvangtoeslag (jaarlijks): {formatEuro(resultaten.totaal.kinderopvangtoeslag)}</li><li>• Kindgebonden budget (jaarlijks): {formatEuro(resultaten.totaal.kindgebondenBudget)}</li><li>• Kinderbijslag (jaarlijks): {formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</li></>)}</ul></div>
-                  </div>
-                )}
-                {activeTab === 'resultaten' && !resultaten && (<div className="text-center py-12"><Calculator className="w-16 h-16 mx-auto text-gray-400 mb-4" /><p className="text-gray-600 text-lg mb-2">Nog geen berekening uitgevoerd</p><p className="text-gray-500 text-sm">Vul eerst alle gegevens in en klik op bereken belasting</p></div>)}
+                </div>
+                {aantalKinderen > 0 && (<>
+                  <div className="bg-pink-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kindgebonden budget</h3><p className="text-sm text-gray-600">Jaarlijks kindgebonden budget ({aantalKinderen} {aantalKinderen === 1 ? 'kind' : 'kinderen'}):</p><p className="text-2xl font-bold text-pink-700">{formatEuro(resultaten.totaal.kindgebondenBudget)}</p><p className="text-xs text-gray-500 mt-2">Dit bedrag ontvangt u maandelijks via de Belastingdienst Toeslagen</p></div>
+                  <div className="bg-indigo-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderbijslag</h3><p className="text-sm text-gray-600 mb-3">Kinderbijslag per kind (uitbetaald per kwartaal door SVB):</p><div className="space-y-2 mb-4">{resultaten.totaal.kinderbijslag.details.map((detail) => (<div key={detail.kind} className="flex justify-between text-sm bg-white p-2 rounded"><span>Kind {detail.kind} ({detail.leeftijd} jaar, {detail.percentage}):</span><span className="font-semibold">{formatEuro(detail.kwartaal)} /kwartaal</span></div>))}</div><div className="pt-3 border-t border-indigo-200"><p className="text-sm text-gray-600">Totaal kinderbijslag per jaar:</p><p className="text-2xl font-bold text-indigo-700">{formatEuro(resultaten.totaal.kinderbijslag.totaalJaar)}</p></div></div>
+                  <div className="bg-teal-50 p-6 rounded-lg"><h3 className="text-xl font-bold text-gray-800 mb-4"><Baby className="inline w-6 h-6 mr-2" />Kinderopvangtoeslag</h3><p className="text-sm text-gray-600">Jaarlijkse kinderopvangtoeslag:</p><p className="text-2xl font-bold text-teal-700">{formatEuro(resultaten.totaal.kinderopvangtoeslag)}</p><p className="text-xs text-gray-500 mt-2">Gebaseerd op ingevoerde uren en type opvang</p></div>
+                </>)}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-lg text-white">
+                  <h3 className="text-2xl font-bold mb-6">Eindresultaat aangifte 2026</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center"><span>Bruto belasting (Box 1 + Box 3):</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.brutoBelasting)}</span></div>
+                    <div className="flex justify-between items-center"><span>Totaal heffingskortingen:</span><span className="text-xl font-bold">- {formatEuro(resultaten.totaal.heffingskortingen)}</span></div>
+                    <div className="border-t border-blue-400 pt-3 flex justify-between items-center"><span className="font-semibold">Netto te betalen belasting:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.nettoBelasting)}</span></div>
+                    <div className="flex justify-between items-center"><span>Ingehouden loonheffing:</span><span className="text-xl font-bold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</span></div>
+                   <div className="border-t-2 border-white pt-4 mt-4">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-bold">
+                  {resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen:' : 'Te betalen:'}
+                </span>
+                <span className="text-xl font-bold">
+                  €{Math.abs(resultaten.totaal.teBetalenOntvangen).toLocaleString('nl-NL', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </span>
               </div>
-              {activeTab !== 'resultaten' && (<div className="bg-gray-50 px-6 py-4 border-t border-gray-200"><button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl"><Calculator className="inline w-6 h-6 mr-2" />Bereken belastingen en toeslagen</button></div>)}
             </div>
-            <div className="mt-6 text-center text-sm text-gray-600 bg-white p-4 rounded-lg shadow"><p><strong>Disclaimer:</strong> Deze tool is bedoeld voor indicatieve doeleinden. De werkelijke belasting kan afwijken. Voor officiële berekeningen, raadpleeg de Belastingdienst of een belastingadviseur.</p><p className="mt-2 text-xs">Tarieven en regelgeving 2026 zijn gebaseerd op beschikbare informatie per januari 2026.</p></div>
           </div>
         </div>
-      );
-    }
-    ReactDOM.render(<BelastingCalculator />, document.getElementById('root'));
-  </script>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<BelastingCalculator />, document.getElementById('root'));
+</script>
+
 </body>
 </html>
