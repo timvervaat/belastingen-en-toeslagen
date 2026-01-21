@@ -1010,19 +1010,23 @@
                           let inkomenVerschil = null;
                           
                           if (index < berekeningenLog.length - 1) {
-                            const vorigeLog = berekeningenLog[index + 1];
-                            const huidigNetto = log.input.teBetalen + log.input.kinderopvangtoeslag + 
-                                               log.input.kindgebondenBudget + log.input.kinderbijslag;
-                            const vorigNetto = vorigeLog.input.teBetalen + vorigeLog.input.kinderopvangtoeslag + 
-                                              vorigeLog.input.kindgebondenBudget + vorigeLog.input.kinderbijslag;
-                            
-                            marginaleVerandering = huidigNetto - vorigNetto;
-                            inkomenVerschil = log.input.totaalBox1Inkomen - vorigeLog.input.totaalBox1Inkomen;
-                            
-                            if (inkomenVerschil !== 0) {
-                              marginaleDruk = ((inkomenVerschil - marginaleVerandering) / inkomenVerschil) * 100;
-                            }
-                          }
+  const vorigeLog = berekeningenLog[index + 1];
+  const huidigNetto = log.input.teBetalen + log.input.kinderopvangtoeslag + 
+                     log.input.kindgebondenBudget + log.input.kinderbijslag;
+  const vorigNetto = vorigeLog.input.teBetalen + vorigeLog.input.kinderopvangtoeslag + 
+                    vorigeLog.input.kindgebondenBudget + vorigeLog.input.kinderbijslag;
+  
+  marginaleVerandering = huidigNetto - vorigNetto;
+  
+  // Inkomensverschil (verzamelinkomen)
+  inkomenVerschil = log.input.verzamelinkomen - vorigeLog.input.verzamelinkomen;
+  
+  // Marginale druk berekenen
+  if (inkomenVerschil !== 0) {
+    // Verschil in wat je overhoudt / verschil in verzamelinkomen
+    marginaleDruk = ((inkomenVerschil - marginaleVerandering) / inkomenVerschil) * 100;
+  }
+}
                           
                           return (
                             <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
