@@ -629,19 +629,20 @@
                                parseNumber(persoon1.beleggingen) + parseNumber(persoon2.beleggingen);
         
         const logEntry = {
-          timestamp: new Date().toLocaleString('nl-NL'),
-          input: {
-            fiscaalPartner,
-            aantalKinderen,
-            totaalBox1Inkomen,
-            totaalVermogen,
-            teBetalen: teBetalenOntvangen,
-            kinderopvangtoeslag,
-            kindgebondenBudget,
-            kinderbijslag: kinderbijslag.totaalJaar
-          },
-          resultaten: nieuweResultaten
-        };
+  timestamp: new Date().toLocaleString('nl-NL'),
+  input: {
+    fiscaalPartner,
+    aantalKinderen,
+    totaalBox1Inkomen: totaalBox1Inkomen,
+    verzamelinkomen: verzamelinkomen,
+    totaalVermogen: totaalVermogen,
+    teBetalen: teBetalenOntvangen,
+    kinderopvangtoeslag: kinderopvangtoeslag,
+    kindgebondenBudget: kindgebondenBudget,
+    kinderbijslag: kinderbijslag.totaalJaar
+  },
+  resultaten: nieuweResultaten
+};
         
         setBerekeningenLog(prev => [logEntry, ...prev].slice(0, 10));
         setResultaten(nieuweResultaten);
