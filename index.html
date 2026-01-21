@@ -562,6 +562,14 @@
     localStorage.setItem('berekeningenLog', JSON.stringify(berekeningenLog));
   }, [berekeningenLog]);
 
+      // Functie om alle data te wissen
+const wisAlleData = () => {
+  if (window.confirm('Weet je zeker dat je alle opgeslagen gegevens wilt wissen?')) {
+    localStorage.clear();
+    window.location.reload();
+  }
+};
+
       // Handlers
       const updatePersoon1 = (field, value) => {
         setPersoon1(prev => ({ ...prev, [field]: value }));
