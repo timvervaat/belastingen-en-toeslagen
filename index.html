@@ -835,36 +835,44 @@
                     
                     {/* Box 1 Resultaten */}
                     <div className="bg-blue-50 p-6 rounded-lg">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Box 1: Inkomsten uit werk en woning</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Persoon 1 - Box 1 inkomen:</p>
-                          <p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p>
-                          <p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 1 belasting:</p>
-                          <p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p>
-                        </div>
-                        {fiscaalPartner && (
-                          <div>
-                            <p className="text-sm text-gray-600">Persoon 2 - Box 1 inkomen:</p>
-                            <p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p>
-                            <p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 1 belasting:</p>
-                            <p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p>
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-blue-200">
-                        <p className="text-sm text-gray-600">Totaal Box 1 belasting:</p>
-                        <p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.box1Belasting)}</p>
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600">Heffingskortingen:</p>
-                        <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.heffingskortingen)}</p>
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600">Ingehouden loonheffing:</p>
-                        <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</p>
-                      </div>
-                    </div>
+  <h3 className="text-xl font-bold text-gray-800 mb-4">Verzamelinkomen (Box 1 + Box 3 voordeel)</h3>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <p className="text-sm text-gray-600">Persoon 1 - Box 1 inkomen:</p>
+      <p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.box1Inkomen)}</p>
+      <p className="text-sm text-gray-600 mt-2">Persoon 1 - Box 1 belasting:</p>
+      <p className="text-lg font-semibold">{formatEuro(resultaten.persoon1.box1.belasting)}</p>
+    </div>
+    {fiscaalPartner && (
+      <div>
+        <p className="text-sm text-gray-600">Persoon 2 - Box 1 inkomen:</p>
+        <p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.box1Inkomen)}</p>
+        <p className="text-sm text-gray-600 mt-2">Persoon 2 - Box 1 belasting:</p>
+        <p className="text-lg font-semibold">{formatEuro(resultaten.persoon2.box1.belasting)}</p>
+      </div>
+    )}
+  </div>
+  <div className="mt-4 pt-4 border-t border-blue-200">
+    <p className="text-sm text-gray-600">Totaal Box 1 inkomen:</p>
+    <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.box1Inkomen)}</p>
+    <p className="text-sm text-gray-600 mt-2">Box 3 voordeel (belastbaar rendement):</p>
+    <p className="text-lg font-semibold">+ {formatEuro(resultaten.box3.belastbaarRendement)}</p>
+    <p className="text-sm text-gray-600 mt-3 font-semibold">Verzamelinkomen (voor toeslagen):</p>
+    <p className="text-2xl font-bold text-blue-700">{formatEuro(resultaten.totaal.verzamelinkomen)}</p>
+  </div>
+  <div className="mt-4 pt-4 border-t border-blue-200">
+    <p className="text-sm text-gray-600">Totaal Box 1 belasting:</p>
+    <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.box1Belasting)}</p>
+  </div>
+  <div className="mt-4">
+    <p className="text-sm text-gray-600">Heffingskortingen:</p>
+    <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.heffingskortingen)}</p>
+  </div>
+  <div className="mt-4">
+    <p className="text-sm text-gray-600">Ingehouden loonheffing:</p>
+    <p className="text-lg font-semibold">{formatEuro(resultaten.totaal.ingehoudenLoonheffing)}</p>
+  </div>
+</div>
                     
                     {/* Box 3 Resultaten */}
                     <div className="bg-green-50 p-6 rounded-lg">
