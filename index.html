@@ -594,41 +594,86 @@ const logEntry = {
                 </div>
               </div>
             )}
-            {activeTab === 'log' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekeningenhistorie</h2>
-                {berekeningenLog.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p>Nog geen berekeningen uitgevoerd</p>
+{activeTab === 'log' && (
+  <div className="space-y-6">
+    <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekeningenhistorie</h2>
+    {berekeningenLog.length === 0 ? (
+      <div className="text-center py-12 text-gray-500">
+        <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
+        <p>Nog geen berekeningen uitgevoerd</p>
+      </div>
+    ) : (
+      <div className="space-y-4">
+        {berekeningenLog.map((log, index) => {
+          // Bereken marginale verandering en druk
+          let marginaleVerandering = null;
+          let marginaleDruk = null;
+          let inkomenVerschil = null;
+          
+          if (index < berekeningenLog.length - 1) {
+            const vorigeLog = berekeningenLog[index + 1];
+            
+            // Totaal netto (na belasting + toeslagen)
+            const huidigNetto = log.input.teBetalen + log.input.kinderopvangtoeslag + 
+                               log.input.kindgebondenBudget + log.input.kinderbijslag;
+            const vorigNetto = vorigeLog.input.teBetalen + vorigeLog.input.kinderopvangtoeslag + 
+                              vorigeLog.input.kindgebondenBudget + vorigeLog.input.kinderbijslag;
+            
+            marginaleVerandering = huidigNetto - vorigNetto;
+            
+            // Inkomensverschil
+            inkomenVerschil = log.input.totaalBox1Inkomen - vorigeLog.input.totaalBox1Inkomen;
+            
+            // Marginale druk berekenen
+            if (inkomenVerschil !== 0) {
+              // Verschil in wat je overhoudt / verschil in bruto inkomen
+              marginaleDruk = ((inkomenVerschil - marginaleVerandering) / inkomenVerschil) * 100;
+            }
+          }
+          
+          return (
+            <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-sm font-semibold text-gray-700">{log.timestamp}</span>
+                {marginaleVerandering !== null ? (
+                  <div className="text-right">
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      marginaleVerandering >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {marginaleVerandering >= 0 ? '+' : ''}{formatEuro(marginaleVerandering)} vs. vorige
+                    </span>
+                    {marginaleDruk !== null && inkomenVerschil !== 0 && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        Marginale druk: {marginaleDruk.toFixed(1)}%
+                        {inkomenVerschil !== 0 && (
+                          <span className="text-gray-500"> (inkomen {inkomenVerschil >= 0 ? '+' : ''}{formatEuro(inkomenVerschil)})</span>
+                        )}
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {berekeningenLog.map((log, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-sm font-semibold text-gray-700">{log.timestamp}</span>
-                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${log.resultaten.totaal.teBetalenOntvangen >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {log.resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen' : 'Te betalen'}: {formatEuro(Math.abs(log.resultaten.totaal.teBetalenOntvangen))}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
-  <div><span className="text-gray-600">Werk en wonen:</span><p className="font-semibold">{formatEuro(log.input.totaalBox1Inkomen)}</p></div>
-  <div><span className="text-gray-600">Vermogen:</span><p className="font-semibold">{formatEuro(log.input.totaalVermogen)}</p></div>
-  <div><span className="text-gray-600">Belasting:</span><p className="font-semibold">{formatEuro(Math.abs(log.input.teBetalen))}</p></div>
-  <div><span className="text-gray-600">KOT:</span><p className="font-semibold">{formatEuro(log.input.kinderopvangtoeslag)}</p></div>
-  <div><span className="text-gray-600">KGB:</span><p className="font-semibold">{formatEuro(log.input.kindgebondenBudget)}</p></div>
-  <div><span className="text-gray-600">Kinderbijslag:</span><p className="font-semibold">{formatEuro(log.input.kinderbijslag)}</p></div>
-  <div><span className="text-gray-600">Totaal:</span><p className="font-semibold text-blue-700">{formatEuro(Math.abs(log.input.teBetalen + log.input.kinderopvangtoeslag + log.input.kindgebondenBudget + log.input.kinderbijslag))}</p></div>
-</div>
-                      </div>
-                    ))}
-                  </div>
+                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                    Eerste berekening
+                  </span>
                 )}
               </div>
-            )}
-          </div>
-          <div className="bg-gray-50 p-6 border-t border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
+                <div><span className="text-gray-600">Werk en wonen:</span><p className="font-semibold">{formatEuro(log.input.totaalBox1Inkomen)}</p></div>
+                <div><span className="text-gray-600">Vermogen:</span><p className="font-semibold">{formatEuro(log.input.totaalVermogen)}</p></div>
+                <div><span className="text-gray-600">Belasting:</span><p className="font-semibold">{formatEuro(Math.abs(log.input.teBetalen))}</p></div>
+                <div><span className="text-gray-600">KOT:</span><p className="font-semibold">{formatEuro(log.input.kinderopvangtoeslag)}</p></div>
+                <div><span className="text-gray-600">KGB:</span><p className="font-semibold">{formatEuro(log.input.kindgebondenBudget)}</p></div>
+                <div><span className="text-gray-600">Kinderbijslag:</span><p className="font-semibold">{formatEuro(log.input.kinderbijslag)}</p></div>
+                <div><span className="text-gray-600">Totaal:</span><p className="font-semibold text-blue-700">{formatEuro(Math.abs(log.input.teBetalen + log.input.kinderopvangtoeslag + log.input.kindgebondenBudget + log.input.kinderbijslag))}</p></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
+            <div className="bg-gray-50 p-6 border-t border-gray-200">
             <button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-6 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
               <Calculator className="inline w-6 h-6 mr-2" />
               Bereken belastingen en toeslagen
