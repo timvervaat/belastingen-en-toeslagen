@@ -604,12 +604,15 @@ const logEntry = {
                             {log.resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen' : 'Te betalen'}: {formatEuro(Math.abs(log.resultaten.totaal.teBetalenOntvangen))}
                           </span>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                          <div><span className="text-gray-600">Fiscaal partner:</span><p className="font-semibold">{log.input.fiscaalPartner ? 'Ja' : 'Nee'}</p></div>
-                          <div><span className="text-gray-600">Kinderen:</span><p className="font-semibold">{log.input.aantalKinderen}</p></div>
-                          <div><span className="text-gray-600">Bruto loon:</span><p className="font-semibold">{formatEuro(log.input.brutoLoon)}</p></div>
-                          <div><span className="text-gray-600">Netto belasting:</span><p className="font-semibold">{formatEuro(log.resultaten.totaal.nettoBelasting)}</p></div>
-                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
+  <div><span className="text-gray-600">Werk en wonen:</span><p className="font-semibold">{formatEuro(log.input.totaalBox1Inkomen)}</p></div>
+  <div><span className="text-gray-600">Vermogen:</span><p className="font-semibold">{formatEuro(log.input.totaalVermogen)}</p></div>
+  <div><span className="text-gray-600">Belasting:</span><p className="font-semibold">{formatEuro(Math.abs(log.input.teBetalen))}</p></div>
+  <div><span className="text-gray-600">KOT:</span><p className="font-semibold">{formatEuro(log.input.kinderopvangtoeslag)}</p></div>
+  <div><span className="text-gray-600">KGB:</span><p className="font-semibold">{formatEuro(log.input.kindgebondenBudget)}</p></div>
+  <div><span className="text-gray-600">Kinderbijslag:</span><p className="font-semibold">{formatEuro(log.input.kinderbijslag)}</p></div>
+  <div><span className="text-gray-600">Totaal:</span><p className="font-semibold text-blue-700">{formatEuro(Math.abs(log.input.teBetalen + log.input.kinderopvangtoeslag + log.input.kindgebondenBudget + log.input.kinderbijslag))}</p></div>
+</div>
                       </div>
                     ))}
                   </div>
