@@ -596,33 +596,33 @@
   const kinderopvangtoeslag = berekenKinderopvangtoeslag(verzamelinkomen, kindOpvang);
         
         const nieuweResultaten = {
-          persoon1: {
-            box1: box1P1, 
-            kortingen: kortingen1, 
-            iack: iackTotaal > 0 && parseNumber(persoon1.brutoLoon) <= parseNumber(persoon2.brutoLoon) ? iackTotaal : 0
-          },
-          persoon2: {
-            box1: box1P2, 
-            kortingen: kortingen2, 
-            iack: iackTotaal > 0 && fiscaalPartner && parseNumber(persoon2.brutoLoon) < parseNumber(persoon1.brutoLoon) ? iackTotaal : 0
-          },
-          box3,
-          totaal: {
-            box1Inkomen: totaalBox1Inkomen,
-            box1Belasting: totaalBox1Belasting,
-            box3Belasting: box3.box3Belasting,
-            brutoBelasting,
-            heffingskortingen: totaalHeffingskortingen,
-            nettoBelasting,
-            ingehoudenLoonheffing: totaalIngehoudenLoonheffing,
-            teBetalenOntvangen,
-            kindgebondenBudget,
-            kinderbijslag,
-            kinderopvangtoeslag,
-            verzamelinkomen: totaalBox1Inkomen,
-            iackTotaal
-          }
-        };
+  persoon1: {
+    box1: box1P1, 
+    kortingen: kortingen1, 
+    iack: iackTotaal > 0 && parseNumber(persoon1.brutoLoon) <= parseNumber(persoon2.brutoLoon) ? iackTotaal : 0
+  },
+  persoon2: {
+    box1: box1P2, 
+    kortingen: kortingen2, 
+    iack: iackTotaal > 0 && fiscaalPartner && parseNumber(persoon2.brutoLoon) < parseNumber(persoon1.brutoLoon) ? iackTotaal : 0
+  },
+  box3,
+  totaal: {
+    box1Inkomen: totaalBox1Inkomen,
+    box1Belasting: totaalBox1Belasting,
+    box3Belasting: box3.box3Belasting,
+    brutoBelasting,
+    heffingskortingen: totaalHeffingskortingen,
+    nettoBelasting,
+    ingehoudenLoonheffing: totaalIngehoudenLoonheffing,
+    teBetalenOntvangen,
+    kindgebondenBudget,
+    kinderbijslag,
+    kinderopvangtoeslag,
+    verzamelinkomen: verzamelinkomen,
+    iackTotaal
+  }
+};
         
         // Log toevoegen
         const totaalVermogen = parseNumber(persoon1.bankrekeningen) + parseNumber(persoon2.bankrekeningen) + 
