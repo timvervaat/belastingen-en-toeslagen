@@ -477,38 +477,90 @@
 
     // ============= MAIN COMPONENT =============
     function BelastingCalculator() {
-      // State
-      const [fiscaalPartner, setFiscaalPartner] = useState(false);
-      const [aantalKinderen, setAantalKinderen] = useState(0);
-      const [kinderenLeeftijden, setKinderenLeeftijden] = useState([]);
-      const [kindOpvang, setKindOpvang] = useState([]);
-      const [wozWaarde, setWozWaarde] = useState('');
-      
-      // Persoon 1 data
-      const [persoon1, setPersoon1] = useState({
-        brutoLoon: '',
-        eigenWoningRente: '',
-        arbeidsongeschiktheid: '',
-        ingehoudenLoonheffing: '',
-        bankrekeningen: '',
-        beleggingen: '',
-        schulden: ''
-      });
-      
-      // Persoon 2 data
-      const [persoon2, setPersoon2] = useState({
-        brutoLoon: '',
-        eigenWoningRente: '',
-        arbeidsongeschiktheid: '',
-        ingehoudenLoonheffing: '',
-        bankrekeningen: '',
-        beleggingen: '',
-        schulden: ''
-      });
-      
-      const [resultaten, setResultaten] = useState(null);
-      const [activeTab, setActiveTab] = useState('stamgegevens');
-      const [berekeningenLog, setBerekeningenLog] = useState([]);
+  // Helper functie om uit localStorage te laden
+  const loadFromLocalStorage = (key, defaultValue) => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : defaultValue;
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+      return defaultValue;
+    }
+  };
+
+  // State met localStorage
+  const [fiscaalPartner, setFiscaalPartner] = useState(() => loadFromLocalStorage('fiscaalPartner', false));
+  const [aantalKinderen, setAantalKinderen] = useState(() => loadFromLocalStorage('aantalKinderen', 0));
+  const [kinderenLeeftijden, setKinderenLeeftijden] = useState(() => loadFromLocalStorage('kinderenLeeftijden', []));
+  const [kindOpvang, setKindOpvang] = useState(() => loadFromLocalStorage('kindOpvang', []));
+  const [wozWaarde, setWozWaarde] = useState(() => loadFromLocalStorage('wozWaarde', ''));
+  
+  // Persoon 1 data
+  const [persoon1, setPersoon1] = useState(() => loadFromLocalStorage('persoon1', {
+    brutoLoon: '',
+    eigenWoningRente: '',
+    arbeidsongeschiktheid: '',
+    ingehoudenLoonheffing: '',
+    bankrekeningen: '',
+    beleggingen: '',
+    schulden: ''
+  }));
+  
+  // Persoon 2 data
+  const [persoon2, setPersoon2] = useState(() => loadFromLocalStorage('persoon2', {
+    brutoLoon: '',
+    eigenWoningRente: '',
+    arbeidsongeschiktheid: '',
+    ingehoudenLoonheffing: '',
+    bankrekeningen: '',
+    beleggingen: '',
+    schulden: ''
+  }));
+  
+  const [resultaten, setResultaten] = useState(() => loadFromLocalStorage('resultaten', null));
+  const [activeTab, setActiveTab] = useState(() => loadFromLocalStorage('activeTab', 'stamgegevens'));
+  const [berekeningenLog, setBerekeningenLog] = useState(() => loadFromLocalStorage('berekeningenLog', []));
+
+  // Effect om state naar localStorage te schrijven
+  React.useEffect(() => {
+    localStorage.setItem('fiscaalPartner', JSON.stringify(fiscaalPartner));
+  }, [fiscaalPartner]);
+
+  React.useEffect(() => {
+    localStorage.setItem('aantalKinderen', JSON.stringify(aantalKinderen));
+  }, [aantalKinderen]);
+
+  React.useEffect(() => {
+    localStorage.setItem('kinderenLeeftijden', JSON.stringify(kinderenLeeftijden));
+  }, [kinderenLeeftijden]);
+
+  React.useEffect(() => {
+    localStorage.setItem('kindOpvang', JSON.stringify(kindOpvang));
+  }, [kindOpvang]);
+
+  React.useEffect(() => {
+    localStorage.setItem('wozWaarde', JSON.stringify(wozWaarde));
+  }, [wozWaarde]);
+
+  React.useEffect(() => {
+    localStorage.setItem('persoon1', JSON.stringify(persoon1));
+  }, [persoon1]);
+
+  React.useEffect(() => {
+    localStorage.setItem('persoon2', JSON.stringify(persoon2));
+  }, [persoon2]);
+
+  React.useEffect(() => {
+    localStorage.setItem('resultaten', JSON.stringify(resultaten));
+  }, [resultaten]);
+
+  React.useEffect(() => {
+    localStorage.setItem('activeTab', JSON.stringify(activeTab));
+  }, [activeTab]);
+
+  React.useEffect(() => {
+    localStorage.setItem('berekeningenLog', JSON.stringify(berekeningenLog));
+  }, [berekeningenLog]);
 
       // Handlers
       const updatePersoon1 = (field, value) => {
