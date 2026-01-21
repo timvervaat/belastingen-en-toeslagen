@@ -579,6 +579,57 @@
                 </span>
               </div>
             </div>
+</div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'log' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Berekeningenhistorie</h2>
+                {berekeningenLog.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p>Nog geen berekeningen uitgevoerd</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {berekeningenLog.map((log, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-sm font-semibold text-gray-700">{log.timestamp}</span>
+                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${log.resultaten.totaal.teBetalenOntvangen >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {log.resultaten.totaal.teBetalenOntvangen >= 0 ? 'Te ontvangen' : 'Te betalen'}: {formatEuro(Math.abs(log.resultaten.totaal.teBetalenOntvangen))}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                          <div><span className="text-gray-600">Fiscaal partner:</span><p className="font-semibold">{log.input.fiscaalPartner ? 'Ja' : 'Nee'}</p></div>
+                          <div><span className="text-gray-600">Kinderen:</span><p className="font-semibold">{log.input.aantalKinderen}</p></div>
+                          <div><span className="text-gray-600">Bruto loon:</span><p className="font-semibold">{formatEuro(log.input.brutoLoon)}</p></div>
+                          <div><span className="text-gray-600">Netto belasting:</span><p className="font-semibold">{formatEuro(log.resultaten.totaal.nettoBelasting)}</p></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="bg-gray-50 p-6 border-t border-gray-200">
+            <button onClick={berekenAlles} className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 px-6 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <Calculator className="inline w-6 h-6 mr-2" />
+              Bereken belastingen en toeslagen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<BelastingCalculator />, document.getElementById('root'));
+  </script>
+</body>
+</html>                    
           </div>
         </div>
       </div>
