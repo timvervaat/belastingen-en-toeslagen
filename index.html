@@ -334,20 +334,23 @@
       }
     };
     
-    const logEntry = {
-      timestamp: new Date().toLocaleString('nl-NL'),
-      input: {
-        fiscaalPartner,
-        aantalKinderen,
-        brutoLoon: parseFloat(brutoLoon) || 0,
-        brutoLoonPartner: parseFloat(brutoLoonPartner) || 0,
-        wozWaarde: wozNum,
-        bankrekeningen: (parseFloat(bankrekeningen) || 0) + (parseFloat(bankrekeningenPartner) || 0),
-        beleggingen: (parseFloat(beleggingen) || 0) + (parseFloat(beleggingenPartner) || 0),
-        schulden: (parseFloat(schulden) || 0) + (parseFloat(schuldenPartner) || 0)
-      },
-      resultaten: nieuweResultaten
-    };
+    const totaalVermogen = (parseFloat(bankrekeningen) || 0) + (parseFloat(bankrekeningenPartner) || 0) + 
+                       (parseFloat(beleggingen) || 0) + (parseFloat(beleggingenPartner) || 0);
+
+const logEntry = {
+  timestamp: new Date().toLocaleString('nl-NL'),
+  input: {
+    fiscaalPartner,
+    aantalKinderen,
+    totaalBox1Inkomen: totaalBox1Inkomen,
+    totaalVermogen: totaalVermogen,
+    teBetalen: teBetalenOntvangen,
+    kinderopvangtoeslag: kinderopvangtoeslag,
+    kindgebondenBudget: kindgebondenBudget,
+    kinderbijslag: kinderbijslag.totaalJaar
+  },
+  resultaten: nieuweResultaten
+};
     
     setBerekeningenLog(prev => [logEntry, ...prev].slice(0, 10));
     setResultaten(nieuweResultaten);
