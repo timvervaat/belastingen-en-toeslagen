@@ -1127,14 +1127,22 @@
 
               {/* Footer Button */}
               <div className="bg-gray-50 p-6 border-t border-gray-200">
-                <button 
-                  onClick={berekenAlles} 
-                  className="w-full bg-gradient-to-r from-[#CC785C] to-[#B86B52] text-white py-4 px-6 rounded-lg font-bold text-lg hover:from-[#B86B52] hover:to-[#A85B42] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Calculator className="inline w-6 h-6 mr-2" />
-                  Bereken belastingen en toeslagen
-                </button>
-              </div>
+  <div className="space-y-3">
+    <button 
+      onClick={berekenAlles} 
+      className="w-full bg-gradient-to-r from-[#CC785C] to-[#B86B52] text-white py-4 px-6 rounded-lg font-bold text-lg hover:from-[#B86B52] hover:to-[#A85B42] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+    >
+      <Calculator className="inline w-6 h-6 mr-2" />
+      Bereken belastingen en toeslagen
+    </button>
+    <button 
+      onClick={wisAlleData} 
+      className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-semibold text-sm hover:bg-gray-300 transition-all"
+    >
+      Wis alle opgeslagen gegevens
+    </button>
+  </div>
+</div>
             </div>
           </div>
         </div>
