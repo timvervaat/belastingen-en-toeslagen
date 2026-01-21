@@ -100,30 +100,38 @@
       };
 
       const berekenBox3 = (bank1, beleg1, schuld1, bank2 = 0, beleg2 = 0, schuld2 = 0) => {
-        const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
-        const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
-        const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
-        const heffingsVrij = fiscaalPartner ? 118714 : 59357;
-        const schuldDrempel = fiscaalPartner ? 7600 : 3800;
-        const totaalBezittingen = bank + beleg;
-        const nettoSchuldCorrectie = Math.max(0, schuld - schuldDrempel);
-        const belastbaarVermogen = Math.max(0, totaalBezittingen - heffingsVrij - nettoSchuldCorrectie);
-        let belastbaarRendement = 0;
-        if (belastbaarVermogen > 0) {
-          const totaalBruto = bank + beleg + nettoSchuldCorrectie;
-          if (totaalBruto > 0) {
-            const fractieBank = bank / totaalBruto;
-            const fractieBeleg = beleg / totaalBruto;
-            const rendBankDeel = belastbaarVermogen * fractieBank * 0.0128;
-            const rendBelegDeel = belastbaarVermogen * fractieBeleg * 0.06;
-            const rendSchuldDeel = nettoSchuldCorrectie * 0.027;
-            belastbaarRendement = rendBankDeel + rendBelegDeel - rendSchuldDeel;
-            belastbaarRendement = Math.max(0, belastbaarRendement);
-          }
-        }
-        const box3Belasting = belastbaarRendement * 0.36;
-        return { belastbaarVermogen, belastbaarRendement, box3Belasting };
-      };
+  const bank = (parseFloat(bank1) || 0) + (parseFloat(bank2) || 0);
+  const beleg = (parseFloat(beleg1) || 0) + (parseFloat(beleg2) || 0);
+  const schuld = (parseFloat(schuld1) || 0) + (parseFloat(schuld2) || 0);
+  
+  const heffingsVrij = fiscaalPartner ? 118714 : 59357;
+  const schuldDrempel = fiscaalPartner ? 7600 : 3800;
+  
+  const totaalBezittingen = bank + beleg;
+  const aftrekbareSchulden = Math.max(0, schuld - schuldDrempel);
+  const grondslagRendement = totaalBezittingen - aftrekbareSchulden;
+  const belastbaarVermogen = Math.max(0, grondslagRendement - heffingsVrij);
+  
+  let belastbaarRendement = 0;
+  
+  if (belastbaarVermogen > 0 && grondslagRendement > 0) {
+    const rendementBank = bank * 0.0128;
+    const rendementBeleg = beleg * 0.06;
+    const rendementSchuld = aftrekbareSchulden * 0.027;
+    const nettoRendementGrondslag = rendementBank + rendementBeleg - rendementSchuld;
+    const ratio = belastbaarVermogen / grondslagRendement;
+    belastbaarRendement = nettoRendementGrondslag * ratio;
+  }
+  
+  const box3Belasting = belastbaarRendement * 0.36;
+  
+  return { 
+    belastbaarVermogen, 
+    belastbaarRendement, 
+    box3Belasting,
+    grondslagRendement
+  };
+};
 
       const berekenHeffingskortingen = (verzamelinkomen, arbeidsinkomen) => {
         let ahk = 3115;
