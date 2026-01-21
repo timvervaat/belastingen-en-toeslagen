@@ -622,14 +622,19 @@ const wisAlleData = () => {
     fiscaalPartner
   );
   
-  // Verzamelinkomen = Box 1 inkomen + Box 3 belastbaar rendement
-  const verzamelinkomen = totaalBox1Inkomen + box3.belastbaarRendement;
-  
-  // Heffingskortingen
-  const kortingen1 = berekenHeffingskortingen(box1P1.box1Inkomen, parseNumber(persoon1.brutoLoon));
-  const kortingen2 = fiscaalPartner 
-    ? berekenHeffingskortingen(box1P2.box1Inkomen, parseNumber(persoon2.brutoLoon)) 
-    : { ahk: 0, ak: 0 };
+// Verzamelinkomen = Box 1 inkomen + Box 3 belastbaar rendement
+const verzamelinkomen = totaalBox1Inkomen + box3.belastbaarRendement;
+
+// Bereken verzamelinkomen per persoon voor heffingskortingen
+// In de PDF zie je dat elk persoon een eigen verzamelinkomen heeft
+const verzamelinkoменP1 = box1P1.box1Inkomen + (box3.belastbaarRendement * (box1P1.box1Inkomen / totaalBox1Inkomen));
+const verzamelinkoменP2 = fiscaalPartner ? box1P2.box1Inkomen + (box3.belastbaarRendement * (box1P2.box1Inkomen / totaalBox1Inkomen)) : 0;
+
+// Heffingskortingen - gebruik verzamelinkomen per persoon
+const kortingen1 = berekenHeffingskortingen(verzamelinkoменP1, parseNumber(persoon1.brutoLoon));
+const kortingen2 = fiscaalPartner 
+  ? berekenHeffingskortingen(verzamelinkoменP2, parseNumber(persoon2.brutoLoon)) 
+  : { ahk: 0, ak: 0 };
   
   // IACK
   const heeftKindOnder12 = kinderenLeeftijden.some(l => l < 12);
